@@ -78,5 +78,5 @@ module.exports = {
   removeBlogFromReadingList,
   updateUserInfo,
   updatedUserRole,
-  updatePfp;
+  updatePfp,
 };
