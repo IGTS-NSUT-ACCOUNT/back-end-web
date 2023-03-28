@@ -7,7 +7,7 @@ const addNewSubtopic = async (name) => {
   return savedSubtopic;
 };
 // - getAllBlogs()
-const getAllBlogs = async (subtopic_id) => {
+const getAllBlogs = async (subtopic_id, pge_no, limit) => {
   const subtopic = await getSubtopicById(subtopic_id);
   return subtopic.blog_ids;
 };
