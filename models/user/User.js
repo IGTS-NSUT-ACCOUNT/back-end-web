@@ -57,6 +57,7 @@ const userSchema = new Schema(
       enum: ["REGULAR", "ADMIN", "EDITOR"],
       default: "REGULAR",
     },
+    readingList: [{ type: mongoose.Types.ObjectId, ref: "Blog" }],
   },
   { timestamps: true }
 );
