@@ -13,11 +13,9 @@ const commentSchema = new Schema(
       default: 0,
     },
     scored_by: {
-      user_id: {
-        type: mongoose.Types.ObjectId,
-        ref: "User",
-      },
-      score: Boolean,
+      type: Map,
+      of: Boolean,
+      default: new Map(),
     },
     replies: [
       {

@@ -34,12 +34,15 @@ const blogSchema = new Schema(
       type: Number,
       default: 0,
     },
-    liked_by: [
-      {
-        type: mongoose.Types.ObjectId,
-        ref: "User",
-      },
-    ],
+    liked_by: {
+      type: Set,
+      of: mongoose.Types.ObjectId,
+      default: new Set(),
+    },
+    views: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );
