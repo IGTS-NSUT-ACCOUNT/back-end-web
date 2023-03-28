@@ -15,7 +15,7 @@ const addBlog = async ({
     thumbnail,
     title,
     subtopics,
-    status,
+    public: status,
     editor_user_id,
   });
   const savedBlog = await blog.save();
@@ -143,6 +143,10 @@ const removeLike = async (blog_id, user_id) => {
   return updatedBlog;
 };
 
+const deleteBlog = async (blog_id) => {
+  await Blog.findByIdAndDelete(blog_id);
+};
+
 module.exports = {
   addBlog,
   getABlog,
@@ -156,4 +160,5 @@ module.exports = {
   removeCommentFromBlog,
   addLike,
   removeLike,
+  deleteBlog,
 };

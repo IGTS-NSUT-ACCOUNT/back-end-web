@@ -41,6 +41,10 @@ const getBlogIds = async (user_id) => {
   return editor.blog_ids;
 };
 
+const deleteEditor = async (user_id) => {
+  await Editor.findOneAndDelete({ user_id: user_id });
+};
+
 module.exports = {
   registerEditor,
   getEditorByUserId,
@@ -48,4 +52,5 @@ module.exports = {
   addBlogId,
   removeBlogId,
   getBlogIds,
+  deleteEditor,
 };

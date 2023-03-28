@@ -16,4 +16,8 @@ const getAdminByUserId = async (user_id) => {
   return admin;
 };
 
-module.exports = { registerAdmin, getAdminById, getAdminByUserId };
+const deleteAdmin = async (user_id) => {
+  await Admin.findOneAndDelete({ user_id: user_id });
+};
+
+module.exports = { registerAdmin, getAdminById, getAdminByUserId, deleteAdmin };
