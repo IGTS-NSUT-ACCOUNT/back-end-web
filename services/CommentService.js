@@ -2,6 +2,11 @@ const CommentRepository = require("./../repositories/CommentRepository");
 
 // Comments Service
 
+const getAComment = async (comment_id) => {
+  const comment = await CommentRepository.getComment(comment_id);
+  return comment;
+};
+
 // scoreAComment
 const scoreAComment = async (comment_id, user_id, score) => {
   const comment = await CommentRepository.addScore(
@@ -27,6 +32,7 @@ const deleteAReply = async (comment_id, reply_id) => {
 };
 
 module.exports = {
+  getAComment,
   scoreAComment,
   addAReply,
   deleteAReply,

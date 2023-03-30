@@ -53,6 +53,7 @@ const searchBlogsByTitle = async (query, pge_no, limit) => {
         },
       },
     },
+    { $sort: { createdAt: -1 } },
     { $skip: pge_no * limit },
     { $limit: limit },
   ]);
@@ -103,6 +104,12 @@ const getABlogSilent = async (blog_id) => {
   const blog = await Blog.findById(blog_id);
   return blog;
 };
+
+const getComments = async (blog_id) => {
+  const blog = await getABlogSilent(blog_id);
+  return blog.comments;
+};
+
 // - addCommentToBlog
 const addCommentToBlog = async (blog_id, comment_id) => {
   const blog = await getABlogSilent(blog_id);
@@ -161,4 +168,5 @@ module.exports = {
   addLike,
   removeLike,
   deleteBlog,
+  getComments,
 };

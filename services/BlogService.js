@@ -92,6 +92,11 @@ const generateSubTopicsFromBlogList = async (blog_list) => {
   return blog_list;
 };
 
+const getComments = async (blog_id) => {
+  const comments = await BlogRepository.getComments(blog_id);
+  return comments;
+};
+
 // addAComment
 const addAComment = async (user_id, blog_id, content) => {
   const comment = await CommentRepository.addComment(content, user_id);
@@ -173,4 +178,5 @@ module.exports = {
   addLike,
   removeLike,
   getSimilarBlogs,
+  getComments,
 };
