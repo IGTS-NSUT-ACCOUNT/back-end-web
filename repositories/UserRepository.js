@@ -1,8 +1,5 @@
 const User = require("./../models/user/User");
 
-// -registerAUser() -
-
-//   getUserById() -
 const getUserById = async (user_id) => {
   const user = await User.findById(user_id);
   return user;
@@ -23,7 +20,7 @@ const updateUserInfo = async ({
   email,
   organization,
 }) => {
-  const user = await getUserById(id);
+  const user = await getUserById(user_id);
   user.name = { first_name, last_name };
   user.phone = phone;
   user.email = email;

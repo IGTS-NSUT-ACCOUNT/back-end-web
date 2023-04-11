@@ -15,7 +15,7 @@ router.get("/getallblogs/:pgeno", async (req, res, next) => {
     const blogLists = await BlogService.getAllBlogs(Number(req.params.pgeno));
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
-    console.log(errror);
+    console.log(error);
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
@@ -45,7 +45,7 @@ router.get("/:subtopicId/getblogsbynew/:pgeNo", async (req, res, next) => {
     );
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
-    console.log(errror);
+    console.log(error);
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
