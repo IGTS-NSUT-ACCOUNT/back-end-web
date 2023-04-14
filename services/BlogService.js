@@ -2,6 +2,7 @@ const BlogRepository = require("./../repositories/BlogRepository");
 const SubtopicRepository = require("./../repositories/SubtopicRepository");
 const EditorRepository = require("./../repositories/EditorRepository");
 const CommentRepository = require("./../repositories/CommentRepository");
+const UserRepository = require("./../repositories/UserRepository");
 
 require("dotenv").config();
 
@@ -17,6 +18,12 @@ const getAblog = async (blog_id) => {
     return { subtopic_id: subtopic._id, name: subtopic.name };
   });
 
+  const editorUser = await UserRepository.getUserById(blog.editor_user_id);
+  blog.editor = {
+    name: editorUser.name.first_name + " " + editorUser.name.last_name,
+    pfp_url: editorUser.pfp_url,
+  };
+
   return blog;
 };
 
@@ -24,13 +31,17 @@ const getAblog = async (blog_id) => {
 const getAllBlogs = async (pge_no) => {
   const blogs = await BlogRepository.getBlogs(pge_no, limit);
   const expandedSubtopics = await generateSubTopicsFromBlogList(blogs);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent;
 };
 // serachBlogs
 const searchBlog = async (query, pge_no) => {
   const blogs = await BlogRepository.searchBlogsByTitle(query, pge_no, limit);
   const expandedSubtopics = await generateSubTopicsFromBlogList(blogs);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent;
 };
 
 // getBlogsBySubTopic
@@ -39,20 +50,26 @@ const getBlogsBySubTopic = async (pge_no, subtopic_id) => {
   const result = blogs.slice(pge_no * limit, pge_no * limit);
   const finalResult = await generateResultFromBlogIds(result);
   const expandedSubtopics = await generateSubTopicsFromBlogList(finalResult);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent;
 };
 // getBlogsByNew
 const getBlogsByNew = async (pge_no) => {
   const blogs = await BlogRepository.getBlogsByNew(pge_no, limit);
   const expandedSubtopics = await generateSubTopicsFromBlogList(blogs);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent;
 };
 
 // getBlogsByPopular
 const getBlogsByPopular = async (pge_no) => {
   const blogs = await BlogRepository.getBlogsByPopular(pge_no, limit);
   const expandedSubtopics = await generateSubTopicsFromBlogList(blogs);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent;
 };
 // getBlogsByArtist
 const getBlogsByArtist = async (editor_user_id, pge_no) => {
@@ -60,7 +77,9 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
   const result = blogs.slice(pge_no * limit, pge_no * limit);
   const ff = await generateResultFromBlogIds(result);
   const expandedSubtopics = await generateSubTopicsFromBlogList(ff);
-  return expandedSubtopics;
+  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const trimmedContent = trimContent(expandedArtists);
+  return trimmedContent; 
 };
 
 const generateResultFromBlogIds = async (blog_ids) => {
@@ -163,6 +182,28 @@ const getSimilarBlogs = async (blog_id) => {
   const expandedSubtopics = await generateSubTopicsFromBlogList(result);
 
   return expandedSubtopics;
+};
+
+const generateEditorBlogList = async (blogList) => {
+  blogB = blogList.map(async (blog) => {
+    const editorUser = await UserRepository.getUserById(blog.editor_user_id);
+    return {
+      ...blog,
+      editor: {
+        name: editorUser.name.first_name + " " + editorUser.name.last_name,
+        pfp_url: editorUser.pfp_url,
+      },
+    };
+  });
+  return blogB;
+};
+
+const trimContent = (blogList) => {
+  blogL = blogList.map((blog) => {
+    blog.content = blog.content.splice(0, 500);
+    return blog;
+  });
+  return blogL;
 };
 
 module.exports = {
