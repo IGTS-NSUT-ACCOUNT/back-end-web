@@ -4,6 +4,7 @@ const { isAuth } = require("./AuthMiddleware");
 const { validateLoginInput } = require("./../../validation/login");
 const { issueJWT } = require("../../lib/utils");
 const passport = require("passport");
+const { validateRegisterInput } = require("../../validation/register");
 const router = require("express").Router();
 
 // User Controllers /api/user/
@@ -15,7 +16,7 @@ router.get(
   isAuth,
   async (req, res, next) => {
     try {
-      const user_id = mongoose.mongo.ObjectId(req.user.id);
+      const user_id = req.user._id;
       const user = await UserService.getUser(user_id);
       return res.json({ ...user, success: true });
     } catch (error) {
@@ -38,7 +39,6 @@ router.post("/login", async (req, res) => {
     const password = req.body.password;
 
     const token = await UserService.loginUser(email, password);
-
     if (!token) {
       return res
         .status(404)
@@ -70,19 +70,10 @@ router.post("/register", async (req, res) => {
     const registeredUser = await UserService.registerUser(req.body);
 
     if (registeredUser) {
-      const token = issueJWT(registeredUser);
-      if (!token) {
-        return res
-          .status(404)
-          .json({ success: false, message: "Email or password not valid" });
-      } else {
-        res.json({
-          success: true,
-          message: "Registration Successfull",
-          token: token.token,
-          expiresIn: token.expires,
-        });
-      }
+      res.json({
+        success: true,
+        message: "Registration Successfull",
+      });
     } else {
       res.json({ success: false, message: "Failed To Create" });
     }
@@ -93,7 +84,7 @@ router.post("/register", async (req, res) => {
 });
 
 // - /logout POST
-router.post(
+router.get(
   "/logout",
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {

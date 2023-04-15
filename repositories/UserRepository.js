@@ -67,8 +67,8 @@ const removeBlogFromReadingList = async (user_id, blog_id) => {
   return updatedUser;
 };
 
-const registerUser = async ({ name, hash, salt, pfp_url }) => {
-  const user = new User({ name, hash, salt, pfp_url });
+const registerUser = async ({ name, hash, salt, pfp_url, email }) => {
+  const user = new User({ name, hash, salt, pfp_url, email });
   const registeredUser = await user.save();
   return registeredUser;
 };

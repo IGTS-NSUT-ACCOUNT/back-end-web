@@ -29,6 +29,7 @@ require("./config/passport")(passport);
 app.use(passport.initialize());
 
 // Routes
+
 app.use(routes);
 
 const port = 5000;
