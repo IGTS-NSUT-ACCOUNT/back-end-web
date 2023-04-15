@@ -35,9 +35,9 @@ const blogSchema = new Schema(
       default: 0,
     },
     liked_by: {
-      type: Set,
-      of: mongoose.Types.ObjectId,
-      default: new Set(),
+      type: Map,
+      of: Boolean,
+      default: new Map(),
     },
     views: {
       type: Number,

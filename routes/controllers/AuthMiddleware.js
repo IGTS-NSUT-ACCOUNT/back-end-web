@@ -1,6 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const CommentService = require("./../../services/CommentService");
 const BlogService = require("./../../repositories/BlogRepository");
+const { getUserById } = require("../../repositories/UserRepository");
 
 // AuthMiddleware -
 //   IsAuth -
@@ -15,8 +16,11 @@ const isAuth = (req, res, next) => {
   }
 };
 //   IsAdmin -
-const isAdmin = (req, res, next) => {
-  if (req.isAuthenticated() && req.user.role === "ADMIN") {
+const isAdmin = async (req, res, next) => {
+  if (
+    req.isAuthenticated() &&
+    (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN"
+  ) {
     next();
   } else {
     res.status(401).json({
@@ -27,10 +31,11 @@ const isAdmin = (req, res, next) => {
 };
 
 //   IsEditor -
-const isEditor = (req, res, next) => {
+const isEditor = async (req, res, next) => {
   if (
     req.isAuthenticated() &&
-    (req.user.role === "EDITOR" || req.user.role === "ADMIN")
+    ((await getUserById(mongoose.mongo.ObjectId(req.user))).role === "EDITOR" ||
+      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
   ) {
     next();
   } else {
@@ -48,7 +53,7 @@ const isCommentWriter = async (req, res, next) => {
     ((await CommentService.getAComment())._id.equals(
       mongoose.mongo.ObjectId(req.body.comment_id)
     ) ||
-      req.user.role === "ADMIN")
+      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
   ) {
     next();
   } else {
@@ -66,7 +71,7 @@ const isEditorOfTheBlog = async (req, res, next) => {
     ((await BlogService.getABlogSilent(
       mongoose.mongo.ObjectId(req.body.blog_id)
     )) ||
-      req.user.role === "ADMIN")
+      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
   ) {
     next();
   } else {

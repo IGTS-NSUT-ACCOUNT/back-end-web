@@ -38,12 +38,6 @@ const userSchema = new Schema(
       type: String,
     },
 
-    // login credentials
-    username: {
-      type: String,
-      unique: true,
-      required: true,
-    },
     hash: {
       type: String,
       required: true,
@@ -52,6 +46,7 @@ const userSchema = new Schema(
       type: String,
       unique: true,
     },
+
     role: {
       type: String,
       enum: ["REGULAR", "ADMIN", "EDITOR"],
@@ -63,7 +58,5 @@ const userSchema = new Schema(
 );
 
 const User = mongoose.model("User", userSchema);
-
-
 
 module.exports = User;

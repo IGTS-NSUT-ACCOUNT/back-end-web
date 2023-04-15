@@ -4,6 +4,7 @@ const BlogRepository = require("./../../repositories/BlogRepository");
 const { isAuth, isEditorOfTheBlog } = require("./AuthMiddleware");
 const UserService = require("./../../services/UserService");
 const EditorService = require("./../../services/EditorService");
+const passport = require("passport");
 
 const router = require("express").Router();
 
@@ -101,81 +102,114 @@ router.get("/:blogId/comments", async (req, res, next) => {
 });
 
 // - /:id/delete DELETE
-router.delete("/:blogId/delete", isEditorOfTheBlog, async (req, res, next) => {
-  try {
-    const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
-    await EditorService.deleteBlog(blog_id);
-    res.json({ success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error ${error}`, success: false });
+router.delete(
+  "/:blogId/delete",
+  passport.authenticate("jwt", { session: false }),
+  isEditorOfTheBlog,
+  async (req, res, next) => {
+    try {
+      const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
+      await EditorService.deleteBlog(blog_id);
+      res.json({ success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:id/edit  PUT
-router.put("/:blogId/edit", isEditorOfTheBlog, async (req, res, next) => {
-  try {
-    const updatedBlog = await EditorService.editBlog(req.body);
-    res.json({ ...updatedBlog, success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error ${error}`, success: false });
+router.put(
+  "/:blogId/edit",
+  passport.authenticate("jwt", { session: false }),
+  isEditorOfTheBlog,
+  async (req, res, next) => {
+    try {
+      const updatedBlog = await EditorService.editBlog(req.body);
+      res.json({ ...updatedBlog, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogId/addtoReadingList PUT
-router.put("/:blogId/addtoreadinglist", isAuth, async (req, res, next) => {
-  try {
-    const user_id = mongoose.mongo.ObjectId(req.user.id);
-    const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
+router.put(
+  "/:blogId/addtoreadinglist",
+  passport.authenticate("jwt", { session: false }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const user_id = mongoose.mongo.ObjectId(req.user.id);
+      const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
 
-    const updatedUser = UserService.addBlogToReadingList(blog_id, user_id);
-    res.json({ success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error ${error}`, success: false });
+      const updatedUser = UserService.addBlogToReadingList(blog_id, user_id);
+      res.json({ success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogID/removeFromReadingList PUT
-router.put("/:blogId/removefromreadinglist", isAuth, async (req, res, next) => {
-  try {
-    const user_id = mongoose.mongo.ObjectId(req.user.id);
-    const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
+router.put(
+  "/:blogId/removefromreadinglist",
+  passport.authenticate("jwt", { session: false }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const user_id = mongoose.mongo.ObjectId(req.user.id);
+      const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
 
-    const updatedUser = UserService.removeBlogFromReadingLIst(blog_id, user_id);
-    res.json({ success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error ${error}`, success: false });
+      const updatedUser = UserService.removeBlogFromReadingLIst(
+        blog_id,
+        user_id
+      );
+      res.json({ success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogId/addLike PUT
-router.put("/:blogId/addlike", isAuth, async (req, res, next) => {
-  try {
-    const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-    const userId = mongoose.mongo.ObjectId(req.user.id);
-    const updatedBlog = await BlogService.addLike(blog_id, user_id);
-    res.json({ ...updatedBlog, success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error: ${error}`, success: false });
+router.put(
+  "/:blogId/addlike",
+  passport.authenticate("jwt", { session: false }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
+      const userId = mongoose.mongo.ObjectId(req.user.id);
+      const updatedBlog = await BlogService.addLike(blog_id, user_id);
+      res.json({ ...updatedBlog, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogId/removeLike PUT
-router.put("/:blogId/removelike", isAuth, async (req, res, next) => {
-  try {
-    const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-    const userId = mongoose.mongo.ObjectId(req.user.id);
-    const updatedBlog = BlogService.removeLike(blogId, userId);
-    res.json({ ...blog, success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error: ${error}`, success: false });
+router.put(
+  "/:blogId/removelike",
+  passport.authenticate("jwt", { session: false }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
+      const userId = mongoose.mongo.ObjectId(req.user.id);
+      const updatedBlog = BlogService.removeLike(blogId, userId);
+      res.json({ ...blog, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogId GET
 router.get("/:blogId", async (req, res, next) => {

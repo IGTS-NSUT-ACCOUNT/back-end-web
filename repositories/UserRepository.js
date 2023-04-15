@@ -67,6 +67,12 @@ const removeBlogFromReadingList = async (user_id, blog_id) => {
   return updatedUser;
 };
 
+const registerUser = async ({ name, hash, salt, pfp_url }) => {
+  const user = new User({ name, hash, salt, pfp_url });
+  const registeredUser = await user.save();
+  return registeredUser;
+};
+
 module.exports = {
   getUserById,
   getUserByEmail,
@@ -76,4 +82,5 @@ module.exports = {
   updateUserInfo,
   updatedUserRole,
   updatePfp,
+  registerUser,
 };

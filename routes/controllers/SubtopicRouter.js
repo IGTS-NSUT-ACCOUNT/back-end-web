@@ -5,18 +5,24 @@ const UserService = require("../../services/UserService");
 const { isAuth, isEditor } = require("./AuthMiddleware");
 
 const router = require("express").Router();
+const passport = require("passport");
 
 // SubTopic Controllers /api/subtopic
 
 // -/add POST
-router.post("/add", isEditor, async (req, res, next) => {
-  try {
-    const subtopic = await subtopicService.createANewSubtopic(
-      req.body.subtopic_name
-    );
-    res.json({ ...subtopic, success: true });
-  } catch (error) {}
-});
+router.post(
+  "/add",
+  passport.authenticate("jwt", { session: false }),
+  isEditor,
+  async (req, res, next) => {
+    try {
+      const subtopic = await subtopicService.createANewSubtopic(
+        req.body.subtopic_name
+      );
+      res.json({ ...subtopic, success: true });
+    } catch (error) {}
+  }
+);
 
 // - search=?query GET
 router.get("/", async (req, res, next) => {
