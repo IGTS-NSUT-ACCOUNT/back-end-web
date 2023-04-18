@@ -43,6 +43,7 @@ const blogSchema = new Schema(
       type: Number,
       default: 0,
     },
+    url:String
   },
   { timestamps: true }
 );

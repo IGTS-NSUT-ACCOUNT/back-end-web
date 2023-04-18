@@ -69,7 +69,7 @@ router.get("/getblogsbypopular/:pgeNo", async (req, res, next) => {
     );
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
-    console.log(errror);
+    console.log(error);
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
