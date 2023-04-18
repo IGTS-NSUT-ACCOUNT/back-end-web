@@ -12,7 +12,7 @@ router.post(
   isEditor,
   async (req, res, next) => {
     try {
-      const editor_user_id = mongoose.mongo.ObjectId(req.user.id);
+      const editor_user_id = req.user._id;
       const publishedBlog = await EditorService.publishBlog(
         editor_user_id,
         req.body
@@ -31,7 +31,7 @@ router.post(
   isEditor,
   async (req, res, next) => {
     try {
-      const editor_user_id = mongoose.mongo.ObjectId(req.user.id);
+      const editor_user_id = req.user._id;
       const publishedBlog = await EditorService.saveBlog(
         editor_user_id,
         req.body

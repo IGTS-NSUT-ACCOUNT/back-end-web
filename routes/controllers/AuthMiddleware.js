@@ -17,10 +17,7 @@ const isAuth = (req, res, next) => {
 };
 //   IsAdmin -
 const isAdmin = async (req, res, next) => {
-  if (
-    req.isAuthenticated() &&
-    (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN"
-  ) {
+  if (req.isAuthenticated() && req.user.role === "ADMIN") {
     next();
   } else {
     res.status(401).json({
@@ -34,8 +31,7 @@ const isAdmin = async (req, res, next) => {
 const isEditor = async (req, res, next) => {
   if (
     req.isAuthenticated() &&
-    ((await getUserById(mongoose.mongo.ObjectId(req.user))).role === "EDITOR" ||
-      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
+    (req.user.role === "EDITOR" || req.user.role === "ADMIN")
   ) {
     next();
   } else {
@@ -53,7 +49,7 @@ const isCommentWriter = async (req, res, next) => {
     ((await CommentService.getAComment())._id.equals(
       mongoose.mongo.ObjectId(req.body.comment_id)
     ) ||
-      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
+      req.user.role === "ADMIN")
   ) {
     next();
   } else {
@@ -66,12 +62,14 @@ const isCommentWriter = async (req, res, next) => {
 
 //   isEditorOfTheBlog;
 const isEditorOfTheBlog = async (req, res, next) => {
+  console.log("hh");
+  let blog_id = req.params.blogId;
+  if (!blog_id) blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
+  let blog = await BlogService.getABlogSilent(blog_id);
+  console.log(blog.editor_user_id.equals(req.user._id));
   if (
     req.isAuthenticated() &&
-    ((await BlogService.getABlogSilent(
-      mongoose.mongo.ObjectId(req.body.blog_id)
-    )) ||
-      (await getUserById(mongoose.mongo.ObjectId(req.user))).role === "ADMIN")
+    (blog.editor_user_id.equals(req.user._id) || req.user.role === "ADMIN")
   ) {
     next();
   } else {

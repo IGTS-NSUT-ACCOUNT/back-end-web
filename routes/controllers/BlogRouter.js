@@ -214,7 +214,8 @@ router.put(
 // - /:blogId GET
 router.get("/:blogId", async (req, res, next) => {
   try {
-    const blogId = mongoose.mongo.ObjectId(req.params.blogId);
+    console.log(req.params.blogId);
+    const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
     const blog = await BlogRepository.getABlog(blogId);
     res.json({ ...blog, success: true });
   } catch (error) {
@@ -222,5 +223,23 @@ router.get("/:blogId", async (req, res, next) => {
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
+
+// - /:blogId GET
+router.get(
+  "/:blogId/draft",
+  passport.authenticate("jwt", { session: false }),
+  isEditorOfTheBlog,
+  async (req, res, next) => {
+    try {
+      console.log(req.params.blogId);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const blog = await BlogRepository.getABlogSilent(blogId);
+      res.json({ ...blog, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
+  }
+);
 
 module.exports = router;

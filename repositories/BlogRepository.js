@@ -87,16 +87,16 @@ const updateBlog = async ({
   status,
   editor_user_id,
 }) => {
-  const blog = await getABlogSilent(blog_id);
-  blog = {
-    ...blog,
-    content,
-    thumbnail,
-    title,
-    subtopics,
-    status,
-    editor_user_id,
-  };
+  var blog = await getABlogSilent(blog_id);
+
+  blog.content = content;
+  blog.thumbnail = thumbnail;
+  blog.title = title;
+  blog.subtopics = subtopics;
+  blog.status = status;
+  blog.editor_user_id = editor_user_id;
+
+  // console.log(blog);
   const savedBlog = await blog.save();
   return savedBlog;
 };

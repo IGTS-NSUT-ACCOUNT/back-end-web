@@ -14,14 +14,13 @@ const getUserByEmail = async (email_id) => {
 //   updateGeneralInfo() -
 const updateUserInfo = async ({
   user_id,
-  first_name,
-  last_name,
+  name,
   phone,
   email,
   organization,
 }) => {
   const user = await getUserById(user_id);
-  user.name = { first_name, last_name };
+  user.name = name;
   user.phone = phone;
   user.email = email;
   user.organization = organization;
@@ -45,6 +44,16 @@ const updatedUserRole = async (user_id, role) => {
   const updatedUser = await user.save();
   return updatedUser;
 };
+
+//   updateUserRole -
+const updatedUserPass = async (user_id, hash, salt) => {
+  const user = await getUserById(user_id);
+  user.hash = hash;
+  user.salt = salt;
+  const updatedUser = await user.save();
+  return updatedUser;
+};
+
 //   getReadingList() -
 const getReadingList = async (user_id) => {
   const user = await getUserById(user_id);
@@ -73,6 +82,10 @@ const registerUser = async ({ name, hash, salt, pfp_url, email }) => {
   return registeredUser;
 };
 
+const deleteUser = async (user_id) => {
+  await User.findByIdAndDelete(user_id);
+};
+
 module.exports = {
   getUserById,
   getUserByEmail,
@@ -83,4 +96,6 @@ module.exports = {
   updatedUserRole,
   updatePfp,
   registerUser,
+  updatedUserPass,
+  deleteUser,
 };

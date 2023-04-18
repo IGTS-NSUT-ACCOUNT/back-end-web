@@ -91,7 +91,6 @@ router.get(
     try {
       // logout logic here
       req.logout(); // logout the user
-
       return res.json({ success: true });
     } catch (error) {
       console.log(error);
@@ -107,9 +106,44 @@ router.put(
   isAuth,
   async (req, res, next) => {
     try {
-      const user_id = mongoose.mongo.ObjectId(req.user.id);
+      const user_id = req.user._id;
+      console.log("body", req.body);
       const updatedUser = await UserService.editUserProfile(user_id, req.body);
       res.json({ ...updatedUser, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
+  }
+);
+
+// /editpassword
+router.post(
+  "/editpassword",
+  passport.authenticate("jwt", { session: false }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const user_id = req.user._id;
+      const response = await UserService.editUserPass(
+        user_id,
+        req.body.old_pass,
+        req.body.new_pass
+      );
+
+      if (response.success) {
+        res.json({
+          success: true,
+          message: "Successfully updated password",
+          old_pass: true,
+        });
+      } else {
+        res.json({
+          success: false,
+          message: "Old password dont match",
+          old_pass: false,
+        });
+      }
     } catch (error) {
       console.log(error);
       res.json({ message: `Error ${error}`, success: false });
@@ -125,7 +159,15 @@ router.put(
   async (req, res, next) => {
     try {
       // logic
-      res.json({ pfp_url: "", success: true });
+
+      const fileStr = req.body.data;
+      const user_id = req.user._id;
+      const updatedUser = await UserService.editUserProfilePicture(
+        user_id,
+        fileStr
+      );
+
+      res.json({ pfp_url: updatedUser.pfp_url, success: true });
     } catch (error) {
       console.log(error);
       res.json({ message: `Error ${error}`, success: false });
@@ -133,4 +175,19 @@ router.put(
   }
 );
 
+router.post(
+  "/delete",
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const user_id = req.user._id;
+      req.logout();
+      await UserService.deleteUser(user_id);
+      res.json({ message: `Account deleted Successfully`, success: false });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error ${error}`, success: false });
+    }
+  }
+);
 module.exports = router;

@@ -20,8 +20,8 @@ const blogSchema = new Schema(
 
     subtopics: [
       {
-        type: mongoose.Types.ObjectId,
-        ref: "Subtopic",
+        subtopic_id: { type: mongoose.Types.ObjectId, ref: "Subtopic" },
+        name: String,
       },
     ],
 

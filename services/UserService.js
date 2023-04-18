@@ -2,6 +2,7 @@ const UserRepository = require("./../repositories/UserRepository");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { genPassword, validPassword, issueJWT } = require("../lib/utils");
+const { uploadPfp } = require("../repositories/PfpRepository");
 
 // User Service
 // - getUser()
@@ -52,12 +53,31 @@ const editUserProfile = async (user_id, data) => {
     ...data,
   };
 
+  console.log(updatedInfo);
+
   const updatedUser = await UserRepository.updateUserInfo(updatedInfo);
   return updatedUser;
 };
 
 // - editUserProfilePicture()
-const editUserProfilePicture = async () => {};
+const editUserProfilePicture = async (user_id, image) => {
+  const uploadResponse = await uploadPfp(image, user_id);
+  const updatedUser = await UserRepository.updatePfp(
+    user_id,
+    uploadResponse.secure_url
+  );
+  return updatedUser;
+};
+
+const editUserPass = async (user_id, old_pass, new_pass) => {
+  const user = await UserRepository.getUserById(user_id);
+  const isValid = validPassword(old_pass, user.hash, user.salt);
+  if (!isValid) return { success: false, message: "Old password dont match" };
+
+  const { salt, hash } = genPassword(new_pass);
+  const updatedUser = await UserRepository.updatedUserPass(user_id, hash, salt);
+  return { success: true, message: "successfully updated password" };
+};
 
 // - addBlogToReadingList()
 const addBlogToReadingList = async (blog_id, user_id) => {
@@ -98,6 +118,10 @@ function pickCuteMinimalPfpUrl(urls) {
   return randomPfpUrl;
 }
 
+const deleteUser = async(user_id)=>{
+  await UserRepository.deleteUser(user_id);
+}
+
 module.exports = {
   removeBlogFromReadingLIst,
   addBlogToReadingList,
@@ -108,4 +132,6 @@ module.exports = {
   logoutUser,
   registerUser,
   editUserProfilePicture,
+  editUserPass,
+  deleteUser
 };
