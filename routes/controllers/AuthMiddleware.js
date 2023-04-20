@@ -44,11 +44,12 @@ const isEditor = async (req, res, next) => {
 
 //   IsCommentWriter -
 const isCommentWriter = async (req, res, next) => {
+  const commentId = req.params.commentId;
+  const comment = await CommentService.getAComment(commentId);
+
   if (
     req.isAuthenticated() &&
-    ((await CommentService.getAComment())._id.equals(
-      mongoose.mongo.ObjectId(req.body.comment_id)
-    ) ||
+    (comment._id.equals(new mongoose.mongo.ObjectId(req.params.commentId)) ||
       req.user.role === "ADMIN")
   ) {
     next();

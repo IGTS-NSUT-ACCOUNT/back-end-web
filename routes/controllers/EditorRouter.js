@@ -44,4 +44,18 @@ router.post(
   }
 );
 
+router.get("/:editor_user_id", async (req, res, next) => {
+  try {
+    const editor_user_id = new mongoose.mongo.ObjectId(
+      req.params.editor_user_id
+    );
+    const editorCard = await EditorService.getEditorCard(editor_user_id);
+    console.log(editorCard);
+    res.json({ ...editorCard, success: true });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: `Error: ${error}`, success: false });
+  }
+});
+
 module.exports = router;

@@ -10,13 +10,8 @@ const limit = 30;
 // Blog Service
 
 // getAblog
-const getAblog = async (blog_id) => {
+const getAblog = async (blog_id, user_id) => {
   const blog = await BlogRepository.getABlog(blog_id);
-
-  blog.subtopics = blog.subtopics.map(async (el) => {
-    const subtopic = await SubtopicRepository.getSubtopicById(el);
-    return { subtopic_id: subtopic._id, name: subtopic.name };
-  });
 
   const editorUser = await UserRepository.getUserById(blog.editor_user_id);
   blog.editor = {
@@ -24,7 +19,9 @@ const getAblog = async (blog_id) => {
     pfp_url: editorUser.pfp_url,
   };
 
-  return blog;
+  const liked = user_id ? (blog.liked_by.get(user_id) ? true : false) : false;
+  console.log(liked);
+  return { blog, liked };
 };
 
 // getAllBlogs
@@ -79,7 +76,7 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
   const expandedSubtopics = await generateSubTopicsFromBlogList(ff);
   const expandedArtists = await generateEditorBlogList(expandedSubtopics);
   const trimmedContent = trimContent(expandedArtists);
-  return trimmedContent; 
+  return trimmedContent;
 };
 
 const generateResultFromBlogIds = async (blog_ids) => {
@@ -111,11 +108,49 @@ const generateSubTopicsFromBlogList = async (blog_list) => {
   return blog_list;
 };
 
-const getComments = async (blog_id) => {
+const getComments = async (blog_id, user_id) => {
   const comments = await BlogRepository.getComments(blog_id);
-  return comments;
+
+  const result = await generateComments(comments, user_id);
+
+  return result;
 };
 
+const generateComments = async (comments, user_id) => {
+  console.log("generatecomments in ", user_id);
+  const result = await Promise.all(
+    comments.map(async (el, i) => {
+      const comment = await CommentRepository.getComment(el);
+      const commentWriter = await UserRepository.getUserById(comment.user_id);
+      console.log("is user commenter ", user_id, commentWriter._id);
+
+      const user_vote = comment.scored_by.get(commentWriter._id.toString());
+
+      const commBlock = {
+        id: comment._id,
+        name: commentWriter.name,
+        pfp_url: commentWriter.pfp_url,
+        message: comment.content,
+        score: comment.score,
+        is_user_commenter: user_id
+          ? comment.user_id.equals(user_id)
+            ? true
+            : false
+          : false,
+        is_user_voted: user_vote === undefined ? false : true,
+        user_vote: user_vote,
+      };
+      if (comment.replies && comment.replies.length)
+        commBlock.replies = await generateComments(comment.replies, user_id);
+
+      return commBlock;
+    })
+  );
+  // console.log(comments, result);
+  result.sort((a, b) => b.score - a.score);
+
+  return result;
+};
 // addAComment
 const addAComment = async (user_id, blog_id, content) => {
   const comment = await CommentRepository.addComment(content, user_id);

@@ -90,16 +90,28 @@ router.get("/:artistId/getblogsbyartist/:pgeNo", async (req, res, next) => {
 });
 
 // - /:articleId/getComments GET
-router.get("/:blogId/comments", async (req, res, next) => {
-  try {
-    const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-    const comments = BlogService.getComments(blogId);
-    res.json({ comments: comments, success: true });
-  } catch (error) {
-    console.log(errror);
-    res.json({ message: `Error: ${error}`, success: false });
+router.get(
+  "/:blogId/comments",
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+  async (req, res, next) => {
+    try {
+      let user_id = req.user ? req.user._id : null;
+
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      console.log("user_id", user_id);
+      const comments = await BlogService.getComments(blogId, user_id);
+      res.json({ comments: comments, success: true });
+    } catch (error) {
+      console.error(`Error getting comments: ${error}`);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
+  },
+  (err, req, res, next) => {
+    // Handle authentication errors here
+    console.error(`Error authenticating user: ${err}`);
+    res.json({ message: `Error: ${err}`, success: false });
   }
-});
+);
 
 // - /:id/delete DELETE
 router.delete(
@@ -182,9 +194,9 @@ router.put(
   isAuth,
   async (req, res, next) => {
     try {
-      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-      const userId = mongoose.mongo.ObjectId(req.user.id);
-      const updatedBlog = await BlogService.addLike(blog_id, user_id);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const userId = req.user._id;
+      const updatedBlog = await BlogService.addLike(blogId, userId);
       res.json({ ...updatedBlog, success: true });
     } catch (error) {
       console.log(error);
@@ -200,10 +212,10 @@ router.put(
   isAuth,
   async (req, res, next) => {
     try {
-      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-      const userId = mongoose.mongo.ObjectId(req.user.id);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const userId = req.user._id;
       const updatedBlog = BlogService.removeLike(blogId, userId);
-      res.json({ ...blog, success: true });
+      res.json({ ...updatedBlog, success: true });
     } catch (error) {
       console.log(error);
       res.json({ message: `Error: ${error}`, success: false });
@@ -212,17 +224,26 @@ router.put(
 );
 
 // - /:blogId GET
-router.get("/:blogId", async (req, res, next) => {
-  try {
-    console.log(req.params.blogId);
-    const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
-    const blog = await BlogRepository.getABlog(blogId);
-    res.json({ ...blog, success: true });
-  } catch (error) {
-    console.log(error);
-    res.json({ message: `Error: ${error}`, success: false });
+router.get(
+  "/:blogId",
+  passport.authenticate("jwt", { session: false, failWithError: true }),
+  async (req, res, next) => {
+    try {
+      let user_id = req.user ? req.user._id : null;
+
+      console.log("blogid ", req.params.blogId);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const blog = await BlogService.getAblog(blogId, user_id);
+
+      if (!blog.blog) {
+        res.json({ message: "Blog private", success: false });
+      } else res.json({ ...blog, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
   }
-});
+);
 
 // - /:blogId GET
 router.get(

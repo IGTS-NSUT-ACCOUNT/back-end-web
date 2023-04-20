@@ -93,7 +93,7 @@ const updateBlog = async ({
   blog.thumbnail = thumbnail;
   blog.title = title;
   blog.subtopics = subtopics;
-  blog.status = status;
+  blog.public = status;
   blog.editor_user_id = editor_user_id;
 
   // console.log(blog);
@@ -129,9 +129,9 @@ const removeCommentFromBlog = async (blog_id, comment_id) => {
 const addLike = async (blog_id, user_id) => {
   const blog = await getABlogSilent(blog_id);
 
-  if (!blog.liked_by.has(user_id)) {
+  if (!blog.liked_by.get(user_id.toString())) {
     blog.likes++;
-    blog.liked_by.add(user_id);
+    blog.liked_by.set(user_id.toString(),true);
   }
 
   const updatedBlog = await blog.save();
@@ -141,9 +141,9 @@ const addLike = async (blog_id, user_id) => {
 const removeLike = async (blog_id, user_id) => {
   const blog = await getABlogSilent(blog_id);
 
-  if (blog.liked_by.has(user_id)) {
+  if (blog.liked_by.get(user_id.toString())) {
     blog.likes--;
-    blog.liked_by.delete(user_id);
+    blog.liked_by.delete(user_id.toString())
   }
 
   const updatedBlog = await blog.save();

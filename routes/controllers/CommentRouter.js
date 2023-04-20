@@ -14,9 +14,9 @@ router.post(
   isAuth,
   async (req, res, next) => {
     try {
-      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
       const updatedBlog = await BlogService.addAComment(
-        mongoose.mongo.ObjectId(req.user.id),
+        req.user._id,
         blogId,
         req.body.content
       );
@@ -28,14 +28,14 @@ router.post(
   }
 );
 // -/:blogId/:commentId/deleteAComment DELETE
-router.post(
+router.delete(
   "/:blogId/:commentId/deletecomment",
   passport.authenticate("jwt", { session: false }),
   isCommentWriter,
   async (req, res, next) => {
     try {
-      const blogId = mongoose.mongo.ObjectId(req.params.blogId);
-      const commentId = mongoose.mongo.ObjectId(req.params.commentId);
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const commentId = new mongoose.mongo.ObjectId(req.params.commentId);
 
       const updatedBlog = await BlogService.deleteAComment(blogId, commentId);
       res.json({ ...updatedBlog, success: true });
@@ -46,16 +46,16 @@ router.post(
   }
 );
 // -/:commentId/upvoteAComment PUT
-router.post(
+router.put(
   "/:commentId/upvote",
   passport.authenticate("jwt", { session: false }),
   isAuth,
   async (req, res, next) => {
     try {
-      const commentId = mongoose.mongo.ObjectId(req.params.commentId);
+      const commentId = new mongoose.mongo.ObjectId(req.params.commentId);
       const updatedComment = await CommentService.scoreAComment(
         commentId,
-        mongoose.mongo.ObjectId(req.user.id),
+        req.user._id,
         1
       );
       res.json({ ...updatedComment, success: true });
@@ -67,16 +67,16 @@ router.post(
 );
 
 // -/:commentId/downvoteAComment PUT
-router.post(
+router.put(
   "/:commentId/downvote",
   passport.authenticate("jwt", { session: false }),
   isAuth,
   async (req, res, next) => {
     try {
-      const commentId = mongoose.mongo.ObjectId(req.params.commentId);
+      const commentId = new mongoose.mongo.ObjectId(req.params.commentId);
       const updatedComment = await CommentService.scoreAComment(
         commentId,
-        mongoose.mongo.ObjectId(req.user.id),
+        req.user._id,
         -1
       );
       res.json({ ...updatedComment, success: true });
@@ -94,10 +94,10 @@ router.post(
   isAuth,
   async (req, res, next) => {
     try {
-      const commentId = mongoose.mongo.ObjectId(req.params.commentId);
+      const commentId = new mongoose.mongo.ObjectId(req.params.commentId);
       const updatedComment = await CommentService.addAReply(
         commentId,
-        mongoose.mongo.ObjectId(req.user.id),
+        req.user._id,
         req.body.content
       );
       res.json({ ...updatedComment, success: true });
@@ -108,16 +108,16 @@ router.post(
   }
 );
 // -/:deleted_replyId/deleteAReply DELETE
-router.post(
+router.delete(
   "/:commentId/:replyid/deletereply",
   passport.authenticate("jwt", { session: false }),
   isAuth,
   async (req, res, next) => {
     try {
-      const commentId = mongoose.mongo.ObjectId(req.params.commentId);
+      const commentId = new mongoose.mongo.ObjectId(req.params.commentId);
       const updatedComment = await CommentService.deleteAReply(
         commentId,
-        mongoose.mongo.ObjectId(req.params.replyid)
+        new mongoose.mongo.ObjectId(req.params.replyid)
       );
       res.json({ ...updatedComment, success: true });
     } catch (error) {

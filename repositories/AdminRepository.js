@@ -20,4 +20,17 @@ const deleteAdmin = async (user_id) => {
   await Admin.findOneAndDelete({ user_id: user_id });
 };
 
-module.exports = { registerAdmin, getAdminById, getAdminByUserId, deleteAdmin };
+const addBlogId = async (user_id, blog_id) => {
+  const admin = await Admin.findOne({ user_id: user_id });
+  admin.blog_ids.push(blog_id);
+  const savedAdmin = await admin.save();
+  return savedAdmin;
+};
+
+module.exports = {
+  registerAdmin,
+  getAdminById,
+  getAdminByUserId,
+  deleteAdmin,
+  addBlogId,
+};

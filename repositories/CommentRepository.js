@@ -12,15 +12,20 @@ const addComment = async (content, user_id) => {
 const addScore = async (comment_id, vote, user_id) => {
   // check if already voted
   const comment = await getComment(comment_id);
-  const currentScore = comment.scored_by[user_id.toString()];
+  const currentScore = comment.scored_by.get(user_id.toString());
+
+  console.log("comment-score", currentScore);
+
   if (currentScore === undefined) {
     // have not voted yet
     vote ? (comment.score += 1) : (comment.score -= 1);
-    comment.scored_by[user_id.toString()] = vote;
+    comment.scored_by.set(user_id.toString(), vote);
+    console.log("c - ", user_id.toString(), vote, comment.scored_by);
   } else {
     if (vote !== currentScore) {
       vote ? (comment.score += 2) : (comment.score -= 2);
-      comment.scored_by[user_id.toString()] = vote;
+      comment.scored_by.set(user_id.toString(), vote);
+      console.log("c - ", comment.scored_by);
     }
   }
 
