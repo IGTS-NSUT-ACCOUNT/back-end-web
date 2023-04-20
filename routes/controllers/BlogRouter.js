@@ -13,6 +13,7 @@ const router = require("express").Router();
 // -/getAllBlogs GET
 router.get("/getallblogs/:pgeno", async (req, res, next) => {
   try {
+    console.log("cc heer");
     const blogLists = await BlogService.getAllBlogs(Number(req.params.pgeno));
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
@@ -31,7 +32,7 @@ router.get("/searchblogs/:pgeno", async (req, res, next) => {
     );
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
-    console.log(errror);
+    console.log(error);
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
@@ -39,7 +40,7 @@ router.get("/searchblogs/:pgeno", async (req, res, next) => {
 // -/getBlogsBySubTopic/:topic GET
 router.get("/:subtopicId/getblogsbynew/:pgeNo", async (req, res, next) => {
   try {
-    const subtopic_id = mongoose.mongo.ObjectId(subtopic_id);
+    const subtopic_id = new mongoose.mongo.ObjectId(req.params.subtopicId);
     const blogLists = await BlogService.getBlogsBySubTopic(
       Number(req.params.pgeNo),
       subtopic_id
@@ -89,29 +90,34 @@ router.get("/:artistId/getblogsbyartist/:pgeNo", async (req, res, next) => {
   }
 });
 
-// - /:articleId/getComments GET
-router.get(
-  "/:blogId/comments",
-  passport.authenticate("jwt", { session: false, failWithError: true }),
-  async (req, res, next) => {
-    try {
-      let user_id = req.user ? req.user._id : null;
-
-      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
-      console.log("user_id", user_id);
-      const comments = await BlogService.getComments(blogId, user_id);
-      res.json({ comments: comments, success: true });
-    } catch (error) {
-      console.error(`Error getting comments: ${error}`);
-      res.json({ message: `Error: ${error}`, success: false });
+const authenticateUser = (req, res, next) => {
+  passport.authenticate("jwt", { session: false }, (err, user, info) => {
+    if (err) {
+      return next(err);
     }
-  },
-  (err, req, res, next) => {
-    // Handle authentication errors here
-    console.error(`Error authenticating user: ${err}`);
-    res.json({ message: `Error: ${err}`, success: false });
+    if (!user) {
+      req.user_id = null;
+    } else {
+      req.user_id = user._id;
+    }
+    next();
+  })(req, res, next);
+};
+
+// - /:articleId/getComments GET
+router.get("/:blogId/comments", authenticateUser, async (req, res, next) => {
+  try {
+    console.log("called");
+    let user_id = req.user_id;
+    const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+    console.log("user_id", user_id);
+    const comments = await BlogService.getComments(blogId, user_id);
+    res.json({ comments: comments, success: true });
+  } catch (error) {
+    console.error(`Error getting comments: ${error}`);
+    res.json({ message: `Error: ${error}`, success: false });
   }
-);
+});
 
 // - /:id/delete DELETE
 router.delete(
@@ -224,26 +230,21 @@ router.put(
 );
 
 // - /:blogId GET
-router.get(
-  "/:blogId",
-  passport.authenticate("jwt", { session: false, failWithError: true }),
-  async (req, res, next) => {
-    try {
-      let user_id = req.user ? req.user._id : null;
+router.get("/:blogId", authenticateUser, async (req, res, next) => {
+  try {
+    let user_id = req.user_id;
+    console.log("blogid ", req.params.blogId);
+    const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+    const blog = await BlogService.getAblog(blogId, user_id);
 
-      console.log("blogid ", req.params.blogId);
-      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
-      const blog = await BlogService.getAblog(blogId, user_id);
-
-      if (!blog.blog) {
-        res.json({ message: "Blog private", success: false });
-      } else res.json({ ...blog, success: true });
-    } catch (error) {
-      console.log(error);
-      res.json({ message: `Error: ${error}`, success: false });
-    }
+    if (!blog.blog) {
+      res.json({ message: "Blog private", success: false });
+    } else res.json({ ...blog, success: true });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: `Error: ${error}`, success: false });
   }
-);
+});
 
 // - /:blogId GET
 router.get(

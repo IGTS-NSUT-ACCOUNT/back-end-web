@@ -35,10 +35,20 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/all", async (req, res, next) => {
+  try {
+    const subtopics = await subtopicService.getAllSubtopicsBySize();
+    res.json({ subtopics, success: true });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: `Error: ${error}`, success: false });
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   try {
     const subtopic = await SubtopicRepository.getSubtopicById(
-      mongoose.mongo.ObjectId(req.params.id)
+      new mongoose.mongo.ObjectId(req.params.id)
     );
     res.json({ ...subtopic, success: true });
   } catch (error) {

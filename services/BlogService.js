@@ -29,7 +29,8 @@ const getAllBlogs = async (pge_no) => {
   const blogs = await BlogRepository.getBlogs(pge_no, limit);
   const expandedSubtopics = await generateSubTopicsFromBlogList(blogs);
   const expandedArtists = await generateEditorBlogList(expandedSubtopics);
-  const trimmedContent = trimContent(expandedArtists);
+
+  const trimmedContent = await trimContent(expandedArtists);
   return trimmedContent;
 };
 // serachBlogs
@@ -44,10 +45,10 @@ const searchBlog = async (query, pge_no) => {
 // getBlogsBySubTopic
 const getBlogsBySubTopic = async (pge_no, subtopic_id) => {
   const blogs = await SubtopicRepository.getAllBlogs(subtopic_id);
-  const result = blogs.slice(pge_no * limit, pge_no * limit);
+  const result = blogs.slice(pge_no * limit, pge_no * limit + limit);
   const finalResult = await generateResultFromBlogIds(result);
-  const expandedSubtopics = await generateSubTopicsFromBlogList(finalResult);
-  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+
+  const expandedArtists = await generateEditorBlogList(finalResult);
   const trimmedContent = trimContent(expandedArtists);
   return trimmedContent;
 };
@@ -73,37 +74,39 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
   const blogs = await EditorRepository.getBlogIds(editor_user_id);
   const result = blogs.slice(pge_no * limit, pge_no * limit);
   const ff = await generateResultFromBlogIds(result);
-  const expandedSubtopics = await generateSubTopicsFromBlogList(ff);
-  const expandedArtists = await generateEditorBlogList(expandedSubtopics);
+  const expandedArtists = await generateEditorBlogList(ff);
+
+  console.log(expandedArtists);
+
   const trimmedContent = trimContent(expandedArtists);
   return trimmedContent;
 };
 
 const generateResultFromBlogIds = async (blog_ids) => {
-  const result = [];
-  blog_ids.forEach(async (el, i) => {
-    var blog = await BlogRepository.getABlog(el);
-    result.push({
-      title: blog.title,
-      content: blog.content,
-      thumbnail: blog.thumbnail,
-      subtopics: blog.subtopics.map(async (el) => {
-        const subtopic = await SubtopicRepository.getSubtopicById(el);
-        return { subtopic_id: subtopic._id, name: subtopic.name };
-      }),
-      blog_id: blog._id,
-    });
-  });
+  const result = await Promise.all(
+    blog_ids.map(async (el, i) => {
+      console.log("blog_id", el);
+      var blog = await BlogRepository.getABlogSilent(el);
+
+      if (blog.public)
+        return {
+          title: blog.title,
+          content: blog.content,
+          thumbnail: blog.thumbnail,
+          subtopics: blog.subtopics,
+          blog_id: blog._id,
+          editor_user_id: blog.editor_user_id,
+        };
+    })
+  );
+
+  console.log("result", result);
   return result;
 };
 
 const generateSubTopicsFromBlogList = async (blog_list) => {
-  blog_list = blog_list.map((el) => {
-    const subtopics = blog.subtopics.map(async (el) => {
-      const subtopic = await SubtopicRepository.getSubtopicById(el);
-      return { subtopic_id: subtopic._id, name: subtopic.name };
-    });
-    return { ...el, subtopics };
+  blog_list = blog_list.map((blog) => {
+    return blog.toObject();
   });
   return blog_list;
 };
@@ -117,14 +120,14 @@ const getComments = async (blog_id, user_id) => {
 };
 
 const generateComments = async (comments, user_id) => {
-  console.log("generatecomments in ", user_id);
   const result = await Promise.all(
     comments.map(async (el, i) => {
       const comment = await CommentRepository.getComment(el);
       const commentWriter = await UserRepository.getUserById(comment.user_id);
-      console.log("is user commenter ", user_id, commentWriter._id);
 
-      const user_vote = comment.scored_by.get(commentWriter._id.toString());
+      const user_vote = comment.scored_by.get(
+        user_id ? user_id.toString() : ""
+      );
 
       const commBlock = {
         id: comment._id,
@@ -137,7 +140,7 @@ const generateComments = async (comments, user_id) => {
             ? true
             : false
           : false,
-        is_user_voted: user_vote === undefined ? false : true,
+        is_user_voted: user_vote ? true : false,
         user_vote: user_vote,
       };
       if (comment.replies && comment.replies.length)
@@ -146,6 +149,8 @@ const generateComments = async (comments, user_id) => {
       return commBlock;
     })
   );
+
+  console.log(result);
   // console.log(comments, result);
   result.sort((a, b) => b.score - a.score);
 
@@ -214,28 +219,34 @@ const getSimilarBlogs = async (blog_id) => {
 
   const result = (await generateResultFromBlogIds(resultList)).slice(0, 5);
 
-  const expandedSubtopics = await generateSubTopicsFromBlogList(result);
-
-  return expandedSubtopics;
+  return result;
 };
 
 const generateEditorBlogList = async (blogList) => {
-  blogB = blogList.map(async (blog) => {
-    const editorUser = await UserRepository.getUserById(blog.editor_user_id);
-    return {
-      ...blog,
-      editor: {
-        name: editorUser.name.first_name + " " + editorUser.name.last_name,
-        pfp_url: editorUser.pfp_url,
-      },
-    };
-  });
+  const blogB = await Promise.all(
+    blogList.map(async (blog) => {
+      console.log("blog", blog);
+
+      const editorUser = await UserRepository.getUserById(blog.editor_user_id);
+      if (!editorUser) return blog;
+      return {
+        ...blog,
+        editor: {
+          name: editorUser.name.first_name + " " + editorUser.name.last_name,
+          pfp_url: editorUser.pfp_url,
+        },
+      };
+    })
+  );
+
   return blogB;
 };
 
 const trimContent = (blogList) => {
   blogL = blogList.map((blog) => {
-    blog.content = blog.content.splice(0, 500);
+    if (blog.content && blog.content.length > 500) {
+      blog.content = blog.content.slice(0, 500);
+    }
     return blog;
   });
   return blogL;

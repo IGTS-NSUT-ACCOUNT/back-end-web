@@ -52,6 +52,11 @@ const getSubtopic = async (query) => {
   return results;
 };
 
+const getAllSubtopics = async () => {
+  const subtopics = await Subtopic.find();
+  return subtopics;
+};
+
 module.exports = {
   addNewSubtopic,
   addBlogId,
@@ -59,4 +64,5 @@ module.exports = {
   getAllBlogs,
   getSubtopic,
   getSubtopicById,
+  getAllSubtopics,
 };

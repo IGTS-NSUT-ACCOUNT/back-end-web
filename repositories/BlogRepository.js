@@ -31,7 +31,7 @@ const getABlog = async (blog_id) => {
 };
 // - getAllBlogs
 const getBlogs = async (pge_no, limit) => {
-  const blogs = await Blog.find()
+  const blogs = await Blog.find({ public: true })
     .skip(pge_no * limit)
     .limit(limit);
   return blogs;
@@ -131,7 +131,7 @@ const addLike = async (blog_id, user_id) => {
 
   if (!blog.liked_by.get(user_id.toString())) {
     blog.likes++;
-    blog.liked_by.set(user_id.toString(),true);
+    blog.liked_by.set(user_id.toString(), true);
   }
 
   const updatedBlog = await blog.save();
@@ -143,7 +143,7 @@ const removeLike = async (blog_id, user_id) => {
 
   if (blog.liked_by.get(user_id.toString())) {
     blog.likes--;
-    blog.liked_by.delete(user_id.toString())
+    blog.liked_by.delete(user_id.toString());
   }
 
   const updatedBlog = await blog.save();

@@ -22,6 +22,8 @@ const publishBlog = async (editor_user_id, body) => {
       subtopics: body.subtopics,
     });
 
+    console.log(body.subtopics);
+
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
     });
@@ -31,7 +33,7 @@ const publishBlog = async (editor_user_id, body) => {
     const blog = await BlogRepository.addBlog({
       content: body.content,
       title: body.title,
-      subtopics: subtopics,
+      subtopics: body.subtopics,
       thumbnail: body.thumbnail,
       status: true,
       editor_user_id,
@@ -40,8 +42,8 @@ const publishBlog = async (editor_user_id, body) => {
     const user = await UserRepository.getUserById(editor_user_id);
     if (user.role === "EDITOR")
       await EditorRepository.addBlogId(editor_user_id, blog._id);
-    else if (user.role === "ADMIN")
-      await AdminRepository.addBlogId(editor_user_id, blog._id);
+    // else if (user.role === "ADMIN")
+    //   await AdminRepository.addBlogId(editor_user_id, blog._id);
 
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
@@ -108,10 +110,11 @@ const saveBlog = async (editor_user_id, body) => {
     const user = await UserRepository.getUserById(editor_user_id);
     if (user.role === "EDITOR")
       await EditorRepository.addBlogId(editor_user_id, blog._id);
-    else if (user.role === "ADMIN")
-      await AdminRepository.addBlogId(editor_user_id, blog._id);
+    // else if (user.role === "ADMIN")
+    //   await AdminRepository.addBlogId(editor_user_id, blog._id);
 
     blog.subtopics.forEach(async (subtopic, i) => {
+      console.log(subtopic);
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
     });
 
