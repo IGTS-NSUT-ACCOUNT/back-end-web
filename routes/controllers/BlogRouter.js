@@ -126,7 +126,7 @@ router.delete(
   isEditorOfTheBlog,
   async (req, res, next) => {
     try {
-      const blog_id = mongoose.mongo.ObjectId(req.params.blogId);
+      const blog_id = new mongoose.mongo.ObjectId(req.params.blogId);
       await EditorService.deleteBlog(blog_id);
       res.json({ success: true });
     } catch (error) {

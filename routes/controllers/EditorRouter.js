@@ -44,6 +44,39 @@ router.post(
   }
 );
 
+router.get(
+  "/getallblogs",
+  passport.authenticate("jwt", { session: false }),
+  isEditor,
+  async (req, res) => {
+    try {
+      const editor_user_id = req.user._id;
+      const blogs = await EditorService.getAllBlogs(editor_user_id);
+      res.json({ blogs: blogs, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
+  }
+);
+
+router.get(
+  "/searchblog",
+  passport.authenticate("jwt", { session: false,failWithError:true }),
+  isEditor,
+  async (req, res, next) => {
+    try {
+      const query = req.query.search;
+      const editor_user_id = req.user._id;
+      const result = await EditorService.searchBlogs(query, editor_user_id);
+      res.json({ blogs: result, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error}`, success: false });
+    }
+  }
+);
+
 router.get("/:editor_user_id", async (req, res, next) => {
   try {
     const editor_user_id = new mongoose.mongo.ObjectId(

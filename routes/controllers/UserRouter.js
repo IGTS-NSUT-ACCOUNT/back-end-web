@@ -83,15 +83,19 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// - /logout POST
+// - /logout GET
 router.get(
   "/logout",
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
       // logout logic here
-      req.logout(); // logout the user
-      return res.json({ success: true });
+      req.logout(function (err) {
+        if (err) {
+          return next(err);
+        }
+        return res.json({ success: true });
+      });
     } catch (error) {
       console.log(error);
       res.json({ message: `Error ${error}`, success: false });

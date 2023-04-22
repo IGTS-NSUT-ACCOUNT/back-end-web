@@ -3,6 +3,7 @@ const BlogRepository = require("./../repositories/BlogRepository");
 const UserRepository = require("./../repositories/UserRepository");
 const AdminRepository = require("./../repositories/AdminRepository");
 const SubtopicRepository = require("./../repositories/SubtopicRepository");
+const { generateResultFromBlogIds } = require("./BlogService");
 // Editor Service
 // - publishBlog()
 const publishBlog = async (editor_user_id, body) => {
@@ -138,10 +139,31 @@ const getEditorCard = async (editor_user_id) => {
   };
 };
 
+const getAllBlogs = async (editor_user_id) => {
+  const user = await UserRepository.getUserById(editor_user_id);
+  if (user.role === "EDITOR") {
+    const blog_ids = await EditorRepository.getBlogIds(editor_user_id);
+    const result = await generateResultFromBlogIds(blog_ids);
+    return result;
+  } else if (user.role === "ADMIN") {
+    const blog_ids = await AdminRepository.getBlogIds(editor_user_id);
+    const result = await generateResultFromBlogIds(blog_ids);
+    return result;
+  }
+};
+
+const searchBlogs = async (query, editor_user_id) => {
+  const blogs = await BlogRepository.searchBlogsByTitle(query, 0, 5000);
+  const result = blogs.filter((el) => el.editor_user_id.equals(editor_user_id));
+  return result;
+};
+
 module.exports = {
   publishBlog,
   deleteBlog,
   editBlog,
   saveBlog,
   getEditorCard,
+  getAllBlogs,
+  searchBlogs,
 };

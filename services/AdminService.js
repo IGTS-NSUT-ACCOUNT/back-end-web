@@ -1,7 +1,7 @@
 const AdminRepository = require("./../repositories/AdminRepository");
 const UserRepository = require("./../repositories/UserRepository");
 const EditorRepository = require("./../repositories/EditorRepository");
-
+const BlogRepository = require("./../repositories/BlogRepository");
 // Admin Service
 // - manageUserRole()
 const manageUserRole = async (user_id, newRole) => {
@@ -23,6 +23,16 @@ const manageUserRole = async (user_id, newRole) => {
   return updatedUser;
 };
 
+const searchBlogs = async (query) => {
+  const blogs = await BlogRepository.searchBlogsByTitle(query, 0, 5000);
+  return blogs;
+};
+const getAllBlogs = async () => {
+  const blogs = await BlogRepository.getBlogsByNew(0, 5000);
+  return blogs;
+};
 module.exports = {
   manageUserRole,
+  searchBlogs,
+  getAllBlogs,
 };

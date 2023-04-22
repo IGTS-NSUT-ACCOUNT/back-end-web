@@ -252,6 +252,8 @@ const trimContent = (blogList) => {
   return blogL;
 };
 
+
+
 module.exports = {
   getAblog,
   getAllBlogs,
@@ -266,4 +268,5 @@ module.exports = {
   removeLike,
   getSimilarBlogs,
   getComments,
+  generateResultFromBlogIds,
 };

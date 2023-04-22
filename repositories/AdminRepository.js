@@ -27,6 +27,11 @@ const addBlogId = async (user_id, blog_id) => {
   const savedAdmin = await admin.save();
   return savedAdmin;
 };
+const getBlogIds = async (user_id) => {
+  const admin = await Admin.findOne({ user_id });
+  if (admin && admin.blog_ids) return admin.blog_ids;
+  else return [];
+};
 
 module.exports = {
   registerAdmin,
@@ -34,4 +39,5 @@ module.exports = {
   getAdminByUserId,
   deleteAdmin,
   addBlogId,
+  getBlogIds,
 };
