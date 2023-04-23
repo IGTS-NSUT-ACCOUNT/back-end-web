@@ -5,6 +5,7 @@ const BlogRepository = require("./../repositories/BlogRepository");
 // Admin Service
 // - manageUserRole()
 const manageUserRole = async (user_id, newRole) => {
+  console.log("user", user_id);
   const user = await UserRepository.getUserById(user_id);
 
   if (user.role === "ADMIN") {
@@ -13,7 +14,7 @@ const manageUserRole = async (user_id, newRole) => {
     await EditorRepository.deleteEditor(user_id);
   }
 
-  const updatedUser = await UserRepository.updatedUserRole(newRole);
+  const updatedUser = await UserRepository.updatedUserRole(user_id, newRole);
   if (newRole === "EDITOR") {
     await EditorRepository.registerEditor(user_id);
   } else if (newRole === "ADMIN") {
