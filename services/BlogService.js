@@ -20,7 +20,6 @@ const getAblog = async (blog_id, user_id) => {
   };
 
   const liked = user_id ? (blog.liked_by.get(user_id) ? true : false) : false;
-  console.log(liked);
   return { blog, liked };
 };
 
@@ -76,7 +75,6 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
   const ff = await generateResultFromBlogIds(result);
   const expandedArtists = await generateEditorBlogList(ff);
 
-  console.log(expandedArtists);
 
   const trimmedContent = trimContent(expandedArtists);
   return trimmedContent;
@@ -85,7 +83,6 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
 const generateResultFromBlogIds = async (blog_ids) => {
   const result = await Promise.all(
     blog_ids.map(async (el, i) => {
-      console.log("blog_id", el);
       var blog = await BlogRepository.getABlogSilent(el);
 
       if (blog.public)
@@ -100,7 +97,6 @@ const generateResultFromBlogIds = async (blog_ids) => {
     })
   );
 
-  console.log("result", result);
   return result;
 };
 
@@ -150,7 +146,6 @@ const generateComments = async (comments, user_id) => {
     })
   );
 
-  console.log(result);
   // console.log(comments, result);
   result.sort((a, b) => b.score - a.score);
 
@@ -225,7 +220,6 @@ const getSimilarBlogs = async (blog_id) => {
 const generateEditorBlogList = async (blogList) => {
   const blogB = await Promise.all(
     blogList.map(async (blog) => {
-      console.log("blog", blog);
 
       const editorUser = await UserRepository.getUserById(blog.editor_user_id);
       if (!editorUser) return blog;

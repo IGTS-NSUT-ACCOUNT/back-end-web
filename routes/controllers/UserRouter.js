@@ -111,7 +111,6 @@ router.put(
   async (req, res, next) => {
     try {
       const user_id = req.user._id;
-      console.log("body", req.body);
       const updatedUser = await UserService.editUserProfile(user_id, req.body);
       res.json({ ...updatedUser, success: true });
     } catch (error) {

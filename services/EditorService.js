@@ -23,7 +23,6 @@ const publishBlog = async (editor_user_id, body) => {
       subtopics: body.subtopics,
     });
 
-    console.log(body.subtopics);
 
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
@@ -115,7 +114,6 @@ const saveBlog = async (editor_user_id, body) => {
     //   await AdminRepository.addBlogId(editor_user_id, blog._id);
 
     blog.subtopics.forEach(async (subtopic, i) => {
-      console.log(subtopic);
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
     });
 

@@ -12,7 +12,6 @@ const getHighlights = async () => {
       id: el._id,
     };
   });
-  console.log(result);
   return result;
 };
 

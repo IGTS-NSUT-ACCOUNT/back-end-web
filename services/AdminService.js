@@ -5,7 +5,6 @@ const BlogRepository = require("./../repositories/BlogRepository");
 // Admin Service
 // - manageUserRole()
 const manageUserRole = async (user_id, newRole) => {
-  console.log("user", user_id);
   const user = await UserRepository.getUserById(user_id);
 
   if (user.role === "ADMIN") {

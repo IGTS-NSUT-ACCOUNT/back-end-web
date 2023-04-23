@@ -13,7 +13,6 @@ const router = require("express").Router();
 // -/getAllBlogs GET
 router.get("/getallblogs/:pgeno", async (req, res, next) => {
   try {
-    console.log("cc heer");
     const blogLists = await BlogService.getAllBlogs(Number(req.params.pgeno));
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
@@ -107,10 +106,8 @@ const authenticateUser = (req, res, next) => {
 // - /:articleId/getComments GET
 router.get("/:blogId/comments", authenticateUser, async (req, res, next) => {
   try {
-    console.log("called");
     let user_id = req.user_id;
     const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
-    console.log("user_id", user_id);
     const comments = await BlogService.getComments(blogId, user_id);
     res.json({ comments: comments, success: true });
   } catch (error) {
@@ -233,7 +230,6 @@ router.put(
 router.get("/:blogId", authenticateUser, async (req, res, next) => {
   try {
     let user_id = req.user_id;
-    console.log("blogid ", req.params.blogId);
     const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
     const blog = await BlogService.getAblog(blogId, user_id);
 
@@ -253,7 +249,6 @@ router.get(
   isEditorOfTheBlog,
   async (req, res, next) => {
     try {
-      console.log(req.params.blogId);
       const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
       const blog = await BlogRepository.getABlogSilent(blogId);
       res.json({ ...blog, success: true });

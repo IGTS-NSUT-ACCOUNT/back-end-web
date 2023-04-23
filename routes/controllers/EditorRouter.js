@@ -83,7 +83,6 @@ router.get("/:editor_user_id", async (req, res, next) => {
       req.params.editor_user_id
     );
     const editorCard = await EditorService.getEditorCard(editor_user_id);
-    console.log(editorCard);
     res.json({ ...editorCard, success: true });
   } catch (error) {
     console.log(error);

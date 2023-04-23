@@ -32,7 +32,6 @@ const getAllSubtopicsBySize = async () => {
   });
 
   let result = subtopics.filter((el, i) => el.blog_ids.length > 0);
-  console.log(result);
 
   return result;
 };

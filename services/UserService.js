@@ -16,7 +16,6 @@ const getUserByEmail = async (email) => {
 // - loginUser()
 const loginUser = async (email, password) => {
   const user = await UserRepository.getUserByEmail(email);
-  console.log(email, user);
   if (!user) return null;
   const isValid = validPassword(password, user.hash, user.salt);
   if (!isValid) return null;
@@ -53,7 +52,6 @@ const editUserProfile = async (user_id, data) => {
     ...data,
   };
 
-  console.log(updatedInfo);
 
   const updatedUser = await UserRepository.updateUserInfo(updatedInfo);
   return updatedUser;
