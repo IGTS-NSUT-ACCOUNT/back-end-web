@@ -14,10 +14,8 @@ const User = require("../../models/user/User");
 
 const keysecret = process.env.JWT_SECRET;
 
-const sender_email = "igts.nsit@gmail.com";
-const sender_email_pass="ubivwzkqmnjqznmr";
-
-
+const sender_email = process.env.SENDER_EMAIL;
+const sender_email_pass= process.env.SENDER_EMAIL_PASS;
 //email config
 
 const transporter = nodemailer.createTransport({
