@@ -287,8 +287,9 @@ router.get('/forgotpassword/:id/:token', async(req, res) => {
 
 
 //change password
-router.post('/:id/:token/:password',async(req,res)=>{
-  const {id,token,password}=req.params;
+router.post('/changepassword/:id/:token',async(req,res)=>{
+  const {id,token}=req.params;
+  const password=req.body.password;
 
   try{
     const validuser = await User.findOne({_id:id,verifytoken:token});
@@ -297,7 +298,6 @@ router.post('/:id/:token/:password',async(req,res)=>{
 
     if(validuser && verifytoken._id){
      
-
       const response = await UserService.resetUserPass(
         id,
         password
