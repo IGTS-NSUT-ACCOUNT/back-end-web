@@ -77,6 +77,14 @@ const editUserPass = async (user_id, old_pass, new_pass) => {
   return { success: true, message: "successfully updated password" };
 };
 
+const resetUserPass = async (user_id, new_pass) => {
+  const user = await UserRepository.getUserById(user_id);
+
+  const { salt, hash } = genPassword(new_pass);
+  const updatedUser = await UserRepository.updatedUserPass(user_id, hash, salt);
+  return { success: true, message: "successfully updated password" };
+};
+
 // - addBlogToReadingList()
 const addBlogToReadingList = async (blog_id, user_id) => {
   const updatedUser = await UserRepository.addBlogIdToReadingList(
@@ -131,5 +139,6 @@ module.exports = {
   registerUser,
   editUserProfilePicture,
   editUserPass,
+  resetUserPass,
   deleteUser
 };
