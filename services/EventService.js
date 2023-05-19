@@ -9,6 +9,12 @@ const ParticipationTicket = require('../models/event/ParticipationTicket');
 // create a new event
 // - issue moderation tickets
 // - create event
+
+const getAnEvent = async (event_id) => {
+    const event = await EventRepository.getEventById(event_id);
+    return event;
+}
+
 const createAnEvent = async (user_id, event_info) => {
 
     // moderators
@@ -40,6 +46,7 @@ const createAnEvent = async (user_id, event_info) => {
 
         // email them the ticket
 
+        // /:event_id/edit
 
     })
 
@@ -168,6 +175,34 @@ const disableEventActive = async (event_id) => {
     return savedEvent;
 };
 
+const getAllEvents = async (pge_no, limit) => {
+    const events = await EventRepository.getEvents(pge_no, limit);
+    return events
+}
+
+const getRegisteredUsers = async (event_id) => {
+
+    const tickets = await ParticipationTicket.find({
+        event_id
+    });
+
+    return tickets;
+
+}
+
+const deleteRegistrationOfUser = async (event_id, user_id) => {
+
+    // delete the ticket
+    await ParticipationTicket.findOneAndDelete({
+        event_id,
+        user_id
+    });
+
+    // delete it from the event's registered users list
+
+    await EventRepository.deleteRegistrationOfUser(event_id, user_id);
+
+}
 
 module.exports = {
     createAnEvent,
@@ -178,4 +213,8 @@ module.exports = {
     enableRegistration,
     disableEventActive,
     disableRegistration,
+    getAllEvents,
+    getAnEvent,
+    deleteRegistrationOfUser,
+    getRegisteredUsers,
 }

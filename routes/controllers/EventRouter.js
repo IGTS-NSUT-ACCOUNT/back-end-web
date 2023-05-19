@@ -29,23 +29,6 @@ router.post('/createevent', passport.authenticate("jwt", {
         });
     }
 
-
-})
-//get-event GET /:event_id
-router.get('/:event_id', async (req, res) => {
-    try {
-        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id));
-        res.json({
-            event: event,
-            success: true
-        });
-    } catch (error) {
-        console.log(error);
-        res.json({
-            message: `Error: ${error}`,
-            success: false
-        });
-    }
 })
 
 //update-info PUT /:event_id/update
@@ -228,5 +211,103 @@ router.put("/:event_id/disableeventactive", passport.authenticate("jwt", {
         })
     }
 });
+
+router.get('/all', passport.authenticate("jwt", {
+    session: false,
+    failWithError: true
+}), AuthMiddleware.isAdmin, async (req, res) => {
+    try {
+        const events = await EventService.getAllEvents(0, 50000);
+        res.json({
+            events,
+            success: true
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        })
+    }
+})
+
+// get all events 
+router.get('getevents/:pge_no', async (req, res) => {
+    try {
+
+        const events = await EventService.getAllEvents(Number(req.params.pge_no), 20);
+        res.json({
+            events,
+            success: true
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        })
+    }
+})
+
+router.get('/:event_id/registeredusers', passport.authenticate("jwt", {
+    session: false,
+    failWithError: true
+}), AuthMiddleware.isModeratorOfTheEvent, async (req, res) => {
+    try {
+        const event_id = new mongoose.mongo.ObjectId(req.params.event_id);
+        const registeredUsers = await EventService.getRegisteredUsers(event_id);
+        res.json({
+            registeredUsers,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            success: false,
+            message: `Error: ${error}`
+        })
+    }
+});
+router.delete('/:event_id/:user_id/deleteregistration', passport.authenticate("jwt", {
+    session: false,
+    failWithError: true
+}), async (req, res) => {
+    try {
+        const user_id = new mongoose.mongo.ObjectId(req.params.user_id);
+        const event_id = new mongoose.mongo.ObjectId(req.params.event_id);
+        await EventService.deleteRegistrationOfUser(event_id, user_id);
+        res.json({
+            success: true,
+            message: 'successfully deleted user\'s registration'
+        })
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        });
+    }
+})
+
+//get-event GET /:event_id
+router.get('/:event_id', async (req, res) => {
+    try {
+        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id));
+        res.json({
+            event: event,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        });
+    }
+})
+
+
 
 module.exports = router;

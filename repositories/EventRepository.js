@@ -80,6 +80,21 @@ const disableEventActive = async (event_id) => {
     return savedEvent;
 }
 
+const getEvents = async (pge_no, limit) => {
+
+    const events = await Event.find().sort({
+        date_time: -1
+    }).skip(pge_no * limit).limit(limit);
+
+    return events;
+}
+
+const deleteRegistrationOfUser = async (event_id, user_id) => {
+    const event = await Event.findById(event_id);
+    event.registrations = event.registrations.filter((el) => !el.equals(user_id))
+    await event.save();
+}
+
 module.exports = {
     createEvent,
     getEventById,
@@ -89,4 +104,6 @@ module.exports = {
     enableRegistration,
     disableEventActive,
     disableRegistration,
+    getEvents,
+    deleteRegistrationOfUser,
 }

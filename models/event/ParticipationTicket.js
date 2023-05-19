@@ -27,7 +27,6 @@ const participationTicketSchema = new Schema({
             /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
             "Please fill a valid email address",
         ],
-        validate: [isEmail, "invalid email"],
     },
 
     phone: {
