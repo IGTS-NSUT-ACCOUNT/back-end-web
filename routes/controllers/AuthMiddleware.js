@@ -1,7 +1,14 @@
-const { default: mongoose } = require("mongoose");
+const {
+  default: mongoose
+} = require("mongoose");
 const CommentService = require("./../../services/CommentService");
 const BlogService = require("./../../repositories/BlogRepository");
-const { getUserById } = require("../../repositories/UserRepository");
+const {
+  getUserById
+} = require("../../repositories/UserRepository");
+const {
+  getEventById
+} = require("../../repositories/EventRepository");
 
 // AuthMiddleware -
 //   IsAuth -
@@ -81,10 +88,25 @@ const isEditorOfTheBlog = async (req, res, next) => {
   }
 };
 
+const isModeratorOfTheEvent = async (req, res, next) => {
+  const event_id = new mongoose.mongo.ObjectId(req.params.event_id);
+  const event = await getEventById(event_id);
+
+  if (req.isAuthenticated() && (req.user.role === 'ADMIN' || event.event_moderators.some(moderator => moderator === req.user._id)))
+    next();
+  else {
+    res.status(401).json({
+      message: "You are not authorized to view this resource",
+      success: false,
+    });
+  }
+}
+
 module.exports = {
   isAuth,
   isAdmin,
   isEditor,
   isCommentWriter,
   isEditorOfTheBlog,
+  isModeratorOfTheEvent
 };

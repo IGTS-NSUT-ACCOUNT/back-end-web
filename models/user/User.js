@@ -52,7 +52,17 @@ const userSchema = new Schema(
       enum: ["REGULAR", "ADMIN", "EDITOR"],
       default: "REGULAR",
     },
+    society_member:{
+      type:Boolean,
+      default:false,
+    },
     readingList: [{ type: mongoose.Types.ObjectId, ref: "Blog" }],
+    registered_events:[
+      {
+        type:mongoose.Types.ObjectId,
+        ref:'Event'
+      }
+    ]
   },
   { timestamps: true }
 );
