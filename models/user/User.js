@@ -34,6 +34,9 @@ const userSchema = new Schema(
         /^\+?[0-9]{1,3}?[-.\s]?(\([0-9]{1,4}\)|[0-9]{1,4})[-.\s]?[0-9]{1,4}[-.\s]?[0-9]{1,4}[-.\s]?[0-9]{1,4}$/,
     },
 
+    verifytoken: {
+      type:String
+    },
     organization: {
       type: String,
     },
