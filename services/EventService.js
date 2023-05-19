@@ -22,12 +22,12 @@ const createAnEvent = async (user_id, event_info) => {
     const user_ids = [];
     moderator_ids.map(async (element) => {
 
-        const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
-        if (user.society_member)
-            user_ids.push(user._id);
-
+        const user = await UserService.getUserByEmail(element);
+        if (user.society_member){user_ids.push(user._id);}
+            
+        console.log(user_ids,"true")
     });
-
+    console.log(user_ids)
     const savedEvent = await EventRepository.createEvent(user_id, {
         event_title: event_info.event_title,
         date_time: event_info.date_time,
