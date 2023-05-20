@@ -50,7 +50,9 @@ const createAnEvent = async (user_id, event_info) => {
         date_time: new Date(event_info.date_time),
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_moderators: user_ids
+        event_moderators: user_ids,
+        location : event_info.location,
+        event_photos : event_info.event_photos
     })
 
     // tickets

@@ -10,14 +10,18 @@ const createEvent = async (user_id, {
     event_photos,
     location
 }) => {
+    console.log(event_photos)
     const newEvent = new Event({
         event_title,
         date_time,
         main_poster,
         details,
         event_moderators,
-        created_by: user_id
+        created_by: user_id,
+        event_photos:event_photos,
+        location:location
     });
+    console.log(newEvent);
     const savedEvent = await newEvent.save();
     return savedEvent;
 }
