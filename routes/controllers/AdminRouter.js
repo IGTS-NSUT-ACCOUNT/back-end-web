@@ -23,6 +23,23 @@ router.put(
   }
 );
 
+router.put(
+  "/updatesocmem",
+  passport.authenticate("jwt", { session: false }),
+  isAdmin,
+  async (req, res, next) => {
+    try {
+      const user_id = new mongoose.mongo.ObjectId(req.body.user_id);
+      const society_member = req.body.society_member;
+      const updatedUser = await AdminService.manageUserSoc(user_id, society_member);
+      res.json({ ...updatedUser, success: true });
+    } catch (error) {
+      console.log(error);
+      res.json({ message: `Error: ${error} `, success: false });
+    }
+  }
+);
+
 router.get(
   "/getallblogs",
   passport.authenticate("jwt", { session: false }),

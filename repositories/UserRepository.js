@@ -45,6 +45,13 @@ const updatedUserRole = async (user_id, role) => {
   return updatedUser;
 };
 
+const updatedUserSoc = async (user_id, society_member) => {
+  const user = await getUserById(user_id);
+  user.society_member = society_member;
+  const updatedUser = await user.save();
+  return updatedUser;
+};
+
 //   updateUserRole -
 const updatedUserPass = async (user_id, hash, salt) => {
   const user = await getUserById(user_id);
@@ -94,6 +101,7 @@ module.exports = {
   removeBlogFromReadingList,
   updateUserInfo,
   updatedUserRole,
+  updatedUserSoc,
   updatePfp,
   registerUser,
   updatedUserPass,

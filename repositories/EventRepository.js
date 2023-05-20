@@ -16,9 +16,7 @@ const createEvent = async (user_id, {
         main_poster,
         details,
         event_moderators,
-        created_by: user_id,
-        event_photos,
-        location
+        created_by: user_id
     });
     const savedEvent = await newEvent.save();
     return savedEvent;

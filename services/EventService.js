@@ -5,6 +5,22 @@ const ModeratorTicket = require('../models/event/ModeratorTicket');
 const EventRepository = require('./../repositories/EventRepository')
 const UserService = require('./../services/UserService');
 const ParticipationTicket = require('../models/event/ParticipationTicket');
+const jwt = require("jsonwebtoken");
+const User = require("../models/user/User");
+const nodemailer = require("nodemailer");
+
+const keysecret = process.env.JWT_SECRET;
+
+const sender_email = process.env.SENDER_EMAIL;
+const sender_email_pass= process.env.SENDER_EMAIL_PASS;
+
+const transporter = nodemailer.createTransport({
+    service:"gmail",
+    auth:{
+      user:sender_email,
+      pass:sender_email_pass
+    }
+  })
 
 // create a new event
 // - issue moderation tickets
@@ -19,25 +35,21 @@ const createAnEvent = async (user_id, event_info) => {
 
     // moderators
     const moderator_ids = event_info.event_moderators;
-    const user_ids = [];
-    moderator_ids.map(async (element) => {
 
-        console.log(element);
+    const userPromises = moderator_ids.map(async (element) => {
         const user = await UserService.getUserByEmail(element);
         if (user.society_member) {
-            user_ids.push(user._id);
+          return user._id;
         }
+      });
 
-        console.log(user_ids, "true")
-    });
-    console.log(user_ids)
+
+    const user_ids = await Promise.all(userPromises);
     const savedEvent = await EventRepository.createEvent(user_id, {
         event_title: event_info.event_title,
         date_time: new Date(event_info.date_time),
         main_poster: event_info.main_poster,
         details: event_info.details,
-        location: event_info.location,
-        event_photos,
         event_moderators: user_ids
     })
 
@@ -51,6 +63,39 @@ const createAnEvent = async (user_id, event_info) => {
 
         // email them the ticket
 
+        try{
+            const userfind = await UserService.getUser(el);
+            // console.log(userfind)
+            //token generate for reset password
+            const token = jwt.sign({_id:userfind._id},keysecret,{
+              expiresIn:"30d"
+            });
+            
+            const setusertoken = await User.findByIdAndUpdate({_id:userfind._id},{verifytoken:token},{new:true});
+            if(setusertoken){
+              const mailOptions={
+                from:sender_email,
+                to:userfind.email,
+                subject:"Sending Moderation Ticket For Event",
+                text:`
+                Link to access list of Event Moderators: http://localhost:3000/event/${savedEvent._id}/viewmembers
+                Link to accedd/edit Event Details: http://localhost:3000/event-creation/${savedEvent._id}`
+              }
+
+              transporter.sendMail(mailOptions,(error,info)=>{
+                if(error){
+                  console.log("error",error);
+                //   res.status(401).json({status:401,message:"Email not sent"})
+                }else{
+                  console.log("Email sent" , info.response);
+                //   res.status(201).json({status:201,message:"Email sent successfully"});
+                }
+              })
+            }
+          }catch(error){
+            // res.status(401).json({status:401,message:"Invalid User"})
+            console.log(error);
+          }
         // /:event_id/edit
 
     })
@@ -97,7 +142,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         const savedTicket = await newTicket.save();
 
         // email them the ticket
-
+      
 
     })
 
