@@ -19,14 +19,16 @@ const createAnEvent = async (user_id, event_info) => {
 
     // moderators
     const moderator_ids = event_info.event_moderators;
-    const user_ids = [];
-    moderator_ids.map(async (element) => {
 
+    const userPromises = moderator_ids.map(async (element) => {
         const user = await UserService.getUserByEmail(element);
-        if (user.society_member){user_ids.push(user._id);}
-            
-        console.log(user_ids,"true")
-    });
+        if (user.society_member) {
+          return user._id;
+        }
+      });
+
+      
+    const user_ids = await Promise.all(userPromises);
     console.log(user_ids)
     const savedEvent = await EventRepository.createEvent(user_id, {
         event_title: event_info.event_title,

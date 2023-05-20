@@ -23,6 +23,15 @@ const manageUserRole = async (user_id, newRole) => {
   return updatedUser;
 };
 
+const manageUserSoc = async (user_id, society_member) => {
+  const user = await UserRepository.getUserById(user_id);
+
+  const updatedUser = await UserRepository.updatedUserSoc(user_id, society_member);
+
+  return updatedUser;
+};
+
+
 const searchBlogs = async (query) => {
   const blogs = await BlogRepository.searchBlogsByTitle(query, 0, 5000);
   return blogs;
@@ -33,6 +42,7 @@ const getAllBlogs = async () => {
 };
 module.exports = {
   manageUserRole,
+  manageUserSoc,
   searchBlogs,
   getAllBlogs,
 };
