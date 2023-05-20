@@ -21,7 +21,7 @@ const eventSchema = new Schema({
         default: false
     },
 
-    registerations_open: {
+    registrations_open: {
         type: Boolean,
         default: false
     },
@@ -29,6 +29,9 @@ const eventSchema = new Schema({
     registrations: [{
         type: mongoose.mongo.ObjectId,
         ref: "User"
+    }],
+    event_photos: [{
+        type: String
     }],
     created_by: {
         type: mongoose.mongo.ObjectId,

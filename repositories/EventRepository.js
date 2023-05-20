@@ -6,7 +6,9 @@ const createEvent = async (user_id, {
     date_time,
     main_poster,
     details,
-    event_moderators
+    event_moderators,
+    event_photos,
+    location
 }) => {
     const newEvent = new Event({
         event_title,
@@ -14,7 +16,9 @@ const createEvent = async (user_id, {
         main_poster,
         details,
         event_moderators,
-        created_by: user_id
+        created_by: user_id,
+        event_photos,
+        location
     });
     const savedEvent = await newEvent.save();
     return savedEvent;
@@ -30,15 +34,19 @@ const updateEventInfo = async (event_id, user_id, {
     event_title,
     date_time,
     main_poster,
+    event_photos,
     details,
+    location,
 }) => {
     const event = await getEventById(event_id);
     event = {
         ...event,
         event_title,
+        event_photos,
         date_time,
         main_poster,
         details,
+        location,
         created_by: user_id
     }
     const savedEvent = await event.save();
@@ -47,14 +55,14 @@ const updateEventInfo = async (event_id, user_id, {
 // update registration closed
 const enableRegistration = async (event_id) => {
     const event = await getEventById(event_id);
-    event.registerations_open = true;
+    event.registrations_open = true;
     const savedEvent = await event.save();
     return savedEvent;
 }
 // update registration active
 const disableRegistration = async (event_id) => {
     const event = await getEventById(event_id);
-    event.registerations_open = false;
+    event.registrations_open = false;
     const savedEvent = await event.save();
     return savedEvent;
 }

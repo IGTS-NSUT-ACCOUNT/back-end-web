@@ -22,17 +22,22 @@ const createAnEvent = async (user_id, event_info) => {
     const user_ids = [];
     moderator_ids.map(async (element) => {
 
+        console.log(element);
         const user = await UserService.getUserByEmail(element);
-        if (user.society_member){user_ids.push(user._id);}
-            
-        console.log(user_ids,"true")
+        if (user.society_member) {
+            user_ids.push(user._id);
+        }
+
+        console.log(user_ids, "true")
     });
     console.log(user_ids)
     const savedEvent = await EventRepository.createEvent(user_id, {
         event_title: event_info.event_title,
-        date_time: event_info.date_time,
+        date_time: new Date(event_info.date_time),
         main_poster: event_info.main_poster,
         details: event_info.details,
+        location: event_info.location,
+        event_photos,
         event_moderators: user_ids
     })
 
@@ -102,6 +107,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         date_time: event_info.date_time,
         main_poster: event_info.main_poster,
         details: event_info.details,
+        event_photos,
     });
 
     return savedEvent;
@@ -176,6 +182,7 @@ const disableEventActive = async (event_id) => {
 };
 
 const getAllEvents = async (pge_no, limit) => {
+    console.log(limit);
     const events = await EventRepository.getEvents(pge_no, limit);
     return events
 }
@@ -204,6 +211,22 @@ const deleteRegistrationOfUser = async (event_id, user_id) => {
 
 }
 
+const getAnEventDraft = async (event_id) => {
+    console.log("event_id", event_id);
+    const event = await EventRepository.getEventById(event_id);
+    const list = []
+    event.event_moderators.map(async (el) => {
+        const user = await UserService.getUser(el);
+        list.push(user.email);
+    })
+
+    const event2 = event.toObject();
+    event2.event_moderators = list;
+
+    return event2;
+
+}
+
 module.exports = {
     createAnEvent,
     updateEventInfo,
@@ -217,4 +240,5 @@ module.exports = {
     getAnEvent,
     deleteRegistrationOfUser,
     getRegisteredUsers,
+    getAnEventDraft
 }

@@ -8,6 +8,28 @@ const {
 const router = require("express").Router();
 
 //create-event POST /createevent
+
+
+// get all events 
+router.get('/getevents/:pge_no', async (req, res) => {
+    try {
+        const events = await EventService.getAllEvents(Number(req.params.pge_no), 20);
+        res.json({
+            events,
+            success: true
+        });
+
+
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        })
+    }
+})
+
+
 router.post('/createevent', passport.authenticate("jwt", {
     session: false,
     failWithError: true
@@ -16,6 +38,9 @@ router.post('/createevent', passport.authenticate("jwt", {
     try {
         const user_id = req.user._id;
         const event_info = req.body;
+
+        console.log(event_info);
+
         const event = await EventService.createAnEvent(user_id, event_info);
         res.json({
             event,
@@ -231,25 +256,6 @@ router.get('/all', passport.authenticate("jwt", {
     }
 })
 
-// get all events 
-router.get('getevents/:pge_no', async (req, res) => {
-    try {
-
-        const events = await EventService.getAllEvents(Number(req.params.pge_no), 20);
-        res.json({
-            events,
-            success: true
-        });
-
-
-    } catch (error) {
-        console.log(error);
-        res.json({
-            message: `Error: ${error}`,
-            success: false
-        })
-    }
-})
 
 router.get('/:event_id/registeredusers', passport.authenticate("jwt", {
     session: false,
@@ -306,6 +312,38 @@ router.get('/:event_id', async (req, res) => {
             success: false
         });
     }
+})
+
+router.get('/:event_id/draft', passport.authenticate("jwt", {
+    session: false,
+    failWithError: true
+}), AuthMiddleware.isModeratorOfTheEvent, async (req, res) => {
+    try {
+        const event = await EventService.getAnEventDraft(new mongoose.mongo.ObjectId(req.params.event_id));
+        res.json({
+            event: event,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        res.json({
+            message: `Error: ${error}`,
+            success: false
+        });
+    }
+})
+
+router.delete('/:event_id', passport.authenticate("jwt", {
+    session: false,
+    failWithError: true
+}), AuthMiddleware.isAdmin, async (req, res) => {
+
+    try {
+
+    } catch (error) {
+        console.log(error);
+    }
+
 })
 
 
