@@ -15,7 +15,7 @@ const getEditorByUserId = async (user_id) => {
 };
 
 const getEditorById = async (editor_id) => {
-  const editor = await Editor.findById(eidtor_id);
+  const editor = await Editor.findById(editor_id);
   return editor;
 };
 

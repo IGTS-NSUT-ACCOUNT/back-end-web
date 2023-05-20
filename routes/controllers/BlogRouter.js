@@ -77,14 +77,14 @@ router.get("/getblogsbypopular/:pgeNo", async (req, res, next) => {
 // -/:artistId/getBlogsByArtist GET
 router.get("/:artistId/getblogsbyartist/:pgeNo", async (req, res, next) => {
   try {
-    const artist_user_id = mongoose.mongo.ObjectId(req.params.artistId);
+    const artist_user_id =new mongoose.mongo.ObjectId(req.params.artistId);
     const blogLists = await BlogService.getBlogsByArtist(
       artist_user_id,
       Number(req.params.pgeNo)
     );
     res.json({ blogs: blogLists, success: true });
   } catch (error) {
-    console.log(errror);
+    console.log(error);
     res.json({ message: `Error: ${error}`, success: false });
   }
 });
