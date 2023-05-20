@@ -27,7 +27,7 @@ const createAnEvent = async (user_id, event_info) => {
         }
       });
 
-      
+
     const user_ids = await Promise.all(userPromises);
     console.log(user_ids)
     const savedEvent = await EventRepository.createEvent(user_id, {
@@ -35,7 +35,8 @@ const createAnEvent = async (user_id, event_info) => {
         date_time: event_info.date_time,
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_moderators: user_ids
+        event_moderators: user_ids,
+        location: event_info.location
     })
 
     // tickets
@@ -48,6 +49,38 @@ const createAnEvent = async (user_id, event_info) => {
 
         // email them the ticket
 
+        try{
+            const userfind = await UserService.getUser(el);
+            // conso
+            //token generate for reset password
+            const token = jwt.sign({_id:userfind._id},keysecret,{
+              expiresIn:"900s"
+            });
+            
+            const setusertoken = await User.findByIdAndUpdate({_id:userfind._id},{verifytoken:token},{new:true});
+        
+            if(setusertoken){
+              const mailOptions={
+                from:sender_email,
+                to:email.email,
+                subject:"Sending Moderation Ticket For Event",
+                text:`
+                http://localhost:3000/event/${savedEvent._id}/viewmembers`
+              }
+        
+              transporter.sendMail(mailOptions,(error,info)=>{
+                if(error){
+                  console.log("error",error);
+                //   res.status(401).json({status:401,message:"Email not sent"})
+                }else{
+                  console.log("Email sent" , info.response);
+                //   res.status(201).json({status:201,message:"Email sent successfully"});
+                }
+              })
+            }
+          }catch(error){
+            // res.status(401).json({status:401,message:"Invalid User"})
+          }
         // /:event_id/edit
 
     })
@@ -94,7 +127,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         const savedTicket = await newTicket.save();
 
         // email them the ticket
-
+      
 
     })
 

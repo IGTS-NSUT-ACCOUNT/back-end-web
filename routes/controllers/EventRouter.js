@@ -16,6 +16,7 @@ router.post('/createevent', passport.authenticate("jwt", {
     try {
         const user_id = req.user._id;
         const event_info = req.body;
+        console.log(event_info);
         const event = await EventService.createAnEvent(user_id, event_info);
         res.json({
             event,
