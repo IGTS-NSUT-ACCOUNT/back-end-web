@@ -128,6 +128,11 @@ const deleteUser = async(user_id)=>{
   await UserRepository.deleteUser(user_id);
 }
 
+const registerUserForEvent = async(user_id,event_id)=>{
+  const updatedUser=await UserRepository.registerUserForEvent(user_id,event_id);
+  return updatedUser;
+}
+
 module.exports = {
   removeBlogFromReadingLIst,
   addBlogToReadingList,
@@ -140,5 +145,6 @@ module.exports = {
   editUserProfilePicture,
   editUserPass,
   resetUserPass,
-  deleteUser
+  deleteUser,
+  registerUserForEvent
 };

@@ -8,7 +8,7 @@ const ParticipationTicket = require('../models/event/ParticipationTicket');
 const jwt = require("jsonwebtoken");
 const User = require("../models/user/User");
 const nodemailer = require("nodemailer");
-
+const UserRepository = require('./../repositories/UserRepository');
 const keysecret = process.env.JWT_SECRET;
 
 const sender_email = process.env.SENDER_EMAIL;
@@ -198,6 +198,10 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
     })
     await newRegisterationTicket.save();
 
+
+    // add event id to user
+    const updatedUser = await UserService.registerUserForEvent(user_id, event_id);
+
     // email the ticket to the user
 
 
@@ -289,7 +293,8 @@ const deleteRegistrationOfUser = async (event_id, user_id) => {
     });
 
     // delete it from the event's registered users list
-
+    await UserRepository.unregisterUserForEvent(user_id, event_id);
+    
     await EventRepository.deleteRegistrationOfUser(event_id, user_id);
 
 }
@@ -326,6 +331,12 @@ const deleteEvent = async (event_id) => {
 
 }
 
+const getEventsByNew = async (pge_no) => {
+
+    const events = await EventRepository.getEvents(pge_no, 30);
+    return events;
+}
+
 module.exports = {
     createAnEvent,
     updateEventInfo,
@@ -336,6 +347,7 @@ module.exports = {
     disableEventActive,
     disableRegistration,
     getAllEvents,
+    getEventsByNew,
     getAnEvent,
     deleteRegistrationOfUser,
     getRegisteredUsers,

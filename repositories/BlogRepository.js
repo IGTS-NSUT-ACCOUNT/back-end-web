@@ -31,39 +31,50 @@ const getABlog = async (blog_id) => {
 };
 // - getAllBlogs
 const getBlogs = async (pge_no, limit) => {
-  const blogs = await Blog.find({ public: true })
+  const blogs = await Blog.find({
+      public: true
+    })
     .skip(pge_no * limit)
     .limit(limit);
   return blogs;
 };
 //  - serachBlogs || search by title
 const searchBlogsByTitle = async (query, pge_no, limit) => {
-  let results = await Blog.aggregate([
-    {
+  let results = await Blog.aggregate([{
       $search: {
         compound: {
-          should: [
-            {
-              autocomplete: {
-                query: query,
-                path: "title",
-              },
+          should: [{
+            autocomplete: {
+              query: query,
+              path: "title",
             },
-          ],
+          }, ],
         },
       },
     },
-    { $sort: { createdAt: -1 } },
-    { $skip: pge_no * limit },
-    { $limit: limit },
+    {
+      $sort: {
+        createdAt: -1
+      }
+    },
+    {
+      $skip: pge_no * limit
+    },
+    {
+      $limit: limit
+    },
   ]);
   return results;
 };
 
 // - getBlogsByNew
 const getBlogsByNew = async (pge_no, limit) => {
-  const blogs = await Blog.find()
-    .sort({ createdAt: -1 })
+  const blogs = await Blog.find({
+      public: true
+    })
+    .sort({
+      createdAt: -1
+    })
     .skip(pge_no * limit)
     .limit(limit);
   return blogs;
@@ -71,8 +82,12 @@ const getBlogsByNew = async (pge_no, limit) => {
 
 //  - getBlogsByPopular
 const getBlogsByPopular = async (pge_no, limit) => {
-  const blogs = await Blog.find()
-    .sort({ views: 1 })
+  const blogs = await Blog.find({
+      public: true
+    })
+    .sort({
+      views: 1
+    })
     .skip(pge_no * limit)
     .limit(limit);
   return blogs;
