@@ -12,23 +12,38 @@ const nodemailer = require("nodemailer");
 const keysecret = process.env.JWT_SECRET;
 
 const sender_email = process.env.SENDER_EMAIL;
-const sender_email_pass= process.env.SENDER_EMAIL_PASS;
+const sender_email_pass = process.env.SENDER_EMAIL_PASS;
 
 const transporter = nodemailer.createTransport({
-    service:"gmail",
-    auth:{
-      user:sender_email,
-      pass:sender_email_pass
+    service: "gmail",
+    auth: {
+        user: sender_email,
+        pass: sender_email_pass
     }
-  })
+})
 
 // create a new event
 // - issue moderation tickets
 // - create event
 
-const getAnEvent = async (event_id) => {
+const getAnEvent = async (event_id, user_id) => {
     const event = await EventRepository.getEventById(event_id);
-    return event;
+    const res = event.toObject();
+
+    if (user_id) {
+
+        // check if the user is already registered or not
+        const ticket = await ParticipationTicket.findOne({
+            event_id,
+            user_id
+        });
+
+        if (ticket)
+            res.registered = true;
+        else res.registered = false;
+    }
+
+    return res;
 }
 
 const createAnEvent = async (user_id, event_info) => {
@@ -39,9 +54,9 @@ const createAnEvent = async (user_id, event_info) => {
     const userPromises = moderator_ids.map(async (element) => {
         const user = await UserService.getUserByEmail(element);
         if (user.society_member) {
-          return user._id;
+            return user._id;
         }
-      });
+    });
 
 
     const user_ids = await Promise.all(userPromises);
@@ -63,39 +78,47 @@ const createAnEvent = async (user_id, event_info) => {
 
         // email them the ticket
 
-        try{
+        try {
             const userfind = await UserService.getUser(el);
             // console.log(userfind)
             //token generate for reset password
-            const token = jwt.sign({_id:userfind._id},keysecret,{
-              expiresIn:"30d"
+            const token = jwt.sign({
+                _id: userfind._id
+            }, keysecret, {
+                expiresIn: "30d"
             });
-            
-            const setusertoken = await User.findByIdAndUpdate({_id:userfind._id},{verifytoken:token},{new:true});
-            if(setusertoken){
-              const mailOptions={
-                from:sender_email,
-                to:userfind.email,
-                subject:"Sending Moderation Ticket For Event",
-                text:`
+
+            const setusertoken = await User.findByIdAndUpdate({
+                _id: userfind._id
+            }, {
+                verifytoken: token
+            }, {
+                new: true
+            });
+            if (setusertoken) {
+                const mailOptions = {
+                    from: sender_email,
+                    to: userfind.email,
+                    subject: "Sending Moderation Ticket For Event",
+                    text: `
                 Link to access list of Event Moderators: http://localhost:3000/event/${savedEvent._id}/viewmembers
                 Link to accedd/edit Event Details: http://localhost:3000/event-creation/${savedEvent._id}`
-              }
-
-              transporter.sendMail(mailOptions,(error,info)=>{
-                if(error){
-                  console.log("error",error);
-                //   res.status(401).json({status:401,message:"Email not sent"})
-                }else{
-                  console.log("Email sent" , info.response);
-                //   res.status(201).json({status:201,message:"Email sent successfully"});
                 }
-              })
+
+                transporter.sendMail(mailOptions, (error, info) => {
+                    if (error) {
+                        console.log("error", error);
+                        //   res.status(401).json({status:401,message:"Email not sent"})
+                    } else {
+                        console.log("Email sent", info.response);
+                        //   res.status(201).json({status:201,message:"Email sent successfully"});
+                    }
+                })
             }
-          }catch(error){
+        } catch (error) {
             // res.status(401).json({status:401,message:"Invalid User"})
             console.log(error);
-          }
+        }
         // /:event_id/edit
 
     })
@@ -142,7 +165,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         const savedTicket = await newTicket.save();
 
         // email them the ticket
-      
+
 
     })
 

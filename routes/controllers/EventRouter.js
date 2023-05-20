@@ -297,10 +297,30 @@ router.delete('/:event_id/:user_id/deleteregistration', passport.authenticate("j
     }
 })
 
+
+const authenticateUser = (req, res, next) => {
+    passport.authenticate("jwt", {
+        session: false
+    }, (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        if (!user) {
+            req.user_id = null;
+        } else {
+            req.user_id = user._id;
+        }
+        next();
+    })(req, res, next);
+};
+
+
 //get-event GET /:event_id
-router.get('/:event_id', async (req, res) => {
+router.get('/:event_id', authenticateUser, async (req, res) => {
     try {
-        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id));
+
+        const user_id = req.user_id;
+        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id),user_id);
         res.json({
             event: event,
             success: true
