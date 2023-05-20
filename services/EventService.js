@@ -5,6 +5,22 @@ const ModeratorTicket = require('../models/event/ModeratorTicket');
 const EventRepository = require('./../repositories/EventRepository')
 const UserService = require('./../services/UserService');
 const ParticipationTicket = require('../models/event/ParticipationTicket');
+const jwt = require("jsonwebtoken");
+const User = require("../models/user/User");
+const nodemailer = require("nodemailer");
+
+const keysecret = process.env.JWT_SECRET;
+
+const sender_email = process.env.SENDER_EMAIL;
+const sender_email_pass= process.env.SENDER_EMAIL_PASS;
+
+const transporter = nodemailer.createTransport({
+    service:"gmail",
+    auth:{
+      user:sender_email,
+      pass:sender_email_pass
+    }
+  })
 
 // create a new event
 // - issue moderation tickets
@@ -29,7 +45,6 @@ const createAnEvent = async (user_id, event_info) => {
 
 
     const user_ids = await Promise.all(userPromises);
-    console.log(user_ids)
     const savedEvent = await EventRepository.createEvent(user_id, {
         event_title: event_info.event_title,
         date_time: event_info.date_time,
@@ -51,23 +66,23 @@ const createAnEvent = async (user_id, event_info) => {
 
         try{
             const userfind = await UserService.getUser(el);
-            // conso
+            // console.log(userfind)
             //token generate for reset password
             const token = jwt.sign({_id:userfind._id},keysecret,{
-              expiresIn:"900s"
+              expiresIn:"30d"
             });
             
             const setusertoken = await User.findByIdAndUpdate({_id:userfind._id},{verifytoken:token},{new:true});
-        
             if(setusertoken){
               const mailOptions={
                 from:sender_email,
-                to:email.email,
+                to:userfind.email,
                 subject:"Sending Moderation Ticket For Event",
                 text:`
-                http://localhost:3000/event/${savedEvent._id}/viewmembers`
+                Link to access list of Event Moderators: http://localhost:3000/event/${savedEvent._id}/viewmembers
+                Link to accedd/edit Event Details: http://localhost:3000/event-creation/${savedEvent._id}`
               }
-        
+
               transporter.sendMail(mailOptions,(error,info)=>{
                 if(error){
                   console.log("error",error);
@@ -80,6 +95,7 @@ const createAnEvent = async (user_id, event_info) => {
             }
           }catch(error){
             // res.status(401).json({status:401,message:"Invalid User"})
+            console.log(error);
           }
         // /:event_id/edit
 
