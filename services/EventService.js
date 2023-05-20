@@ -66,8 +66,8 @@ const createAnEvent = async (user_id, event_info) => {
         main_poster: event_info.main_poster,
         details: event_info.details,
         event_moderators: user_ids,
-        location : event_info.location,
-        event_photos : event_info.event_photos
+        location: event_info.location,
+        event_photos: event_info.event_photos
     })
 
     // tickets
@@ -254,7 +254,12 @@ const disableEventActive = async (event_id) => {
 const getAllEvents = async (pge_no, limit) => {
     console.log(limit);
     const events = await EventRepository.getEvents(pge_no, limit);
-    return events
+    return events;
+}
+
+const getAllEvents2 = async (pge_no, limit) => {
+    const events = await EventRepository.getEvents2(pge_no, limit);
+    return events;
 }
 
 const getRegisteredUsers = async (event_id) => {
@@ -265,6 +270,14 @@ const getRegisteredUsers = async (event_id) => {
 
     return tickets;
 
+}
+
+const getRegistrationTicket = async (event_id, user_id) => {
+    const ticket = await ParticipationTicket.findOne({
+        event_id,
+        user_id
+    });
+    return ticket;
 }
 
 const deleteRegistrationOfUser = async (event_id, user_id) => {
@@ -297,6 +310,22 @@ const getAnEventDraft = async (event_id) => {
 
 }
 
+const deleteEvent = async (event_id) => {
+
+    // delte all the tickets
+    await ParticipationTicket.deleteMany({
+        event_id
+    });
+    await ModeratorTicket.deleteMany({
+        event_id
+    });
+
+    // delete event
+    await EventRepository.deleteEvent(event_id);
+    return;
+
+}
+
 module.exports = {
     createAnEvent,
     updateEventInfo,
@@ -310,5 +339,8 @@ module.exports = {
     getAnEvent,
     deleteRegistrationOfUser,
     getRegisteredUsers,
-    getAnEventDraft
+    getAnEventDraft,
+    getRegistrationTicket,
+    getAllEvents2,
+    deleteEvent,
 }

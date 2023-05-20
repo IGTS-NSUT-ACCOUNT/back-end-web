@@ -18,8 +18,8 @@ const createEvent = async (user_id, {
         details,
         event_moderators,
         created_by: user_id,
-        event_photos:event_photos,
-        location:location
+        event_photos: event_photos,
+        location: location
     });
     console.log(newEvent);
     const savedEvent = await newEvent.save();
@@ -92,6 +92,16 @@ const disableEventActive = async (event_id) => {
 
 const getEvents = async (pge_no, limit) => {
 
+    const events = await Event.find({
+        active: true
+    }).sort({
+        date_time: -1
+    }).skip(pge_no * limit).limit(limit);
+
+    return events;
+}
+const getEvents2 = async (pge_no, limit) => {
+
     const events = await Event.find().sort({
         date_time: -1
     }).skip(pge_no * limit).limit(limit);
@@ -104,6 +114,9 @@ const deleteRegistrationOfUser = async (event_id, user_id) => {
     event.registrations = event.registrations.filter((el) => !el.equals(user_id))
     await event.save();
 }
+const deleteEvent = async (event_id) => {
+    await Event.findByIdAndDelete(event_id);
+}
 
 module.exports = {
     createEvent,
@@ -115,5 +128,7 @@ module.exports = {
     disableEventActive,
     disableRegistration,
     getEvents,
+    getEvents2,
     deleteRegistrationOfUser,
+    deleteEvent,
 }

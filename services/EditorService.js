@@ -3,7 +3,9 @@ const BlogRepository = require("./../repositories/BlogRepository");
 const UserRepository = require("./../repositories/UserRepository");
 const AdminRepository = require("./../repositories/AdminRepository");
 const SubtopicRepository = require("./../repositories/SubtopicRepository");
-const { generateResultFromBlogIds } = require("./BlogService");
+const {
+  generateResultFromBlogIds
+} = require("./BlogService");
 // Editor Service
 // - publishBlog()
 const publishBlog = async (editor_user_id, body) => {
@@ -42,8 +44,8 @@ const publishBlog = async (editor_user_id, body) => {
     const user = await UserRepository.getUserById(editor_user_id);
     if (user.role === "EDITOR")
       await EditorRepository.addBlogId(editor_user_id, blog._id);
-    // else if (user.role === "ADMIN")
-    //   await AdminRepository.addBlogId(editor_user_id, blog._id);
+    else if (user.role === "ADMIN")
+      await AdminRepository.addBlogId(editor_user_id, blog._id);
 
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
@@ -110,8 +112,8 @@ const saveBlog = async (editor_user_id, body) => {
     const user = await UserRepository.getUserById(editor_user_id);
     if (user.role === "EDITOR")
       await EditorRepository.addBlogId(editor_user_id, blog._id);
-    // else if (user.role === "ADMIN")
-    //   await AdminRepository.addBlogId(editor_user_id, blog._id);
+    else if (user.role === "ADMIN")
+      await AdminRepository.addBlogId(editor_user_id, blog._id);
 
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
@@ -124,8 +126,8 @@ const saveBlog = async (editor_user_id, body) => {
 const getEditorCard = async (editor_user_id) => {
   const user = await UserRepository.getUserById(editor_user_id);
   let blogs = [];
-  // if (user.role === "ADMIN")
-  //   blogs = (await AdminRepository.getAdminByUserId(editor_user_id)).blog_ids;
+  if (user.role === "ADMIN")
+    blogs = (await AdminRepository.getAdminByUserId(editor_user_id)).blog_ids;
   if (user.role === "EDITOR")
     blogs = await EditorRepository.getBlogIds(editor_user_id);
   const pfp_url = user.pfp_url;

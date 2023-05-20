@@ -242,7 +242,7 @@ router.get('/all', passport.authenticate("jwt", {
     failWithError: true
 }), AuthMiddleware.isAdmin, async (req, res) => {
     try {
-        const events = await EventService.getAllEvents(0, 50000);
+        const events = await EventService.getAllEvents2(0, 50000);
         res.json({
             events,
             success: true
@@ -320,7 +320,7 @@ router.get('/:event_id', authenticateUser, async (req, res) => {
     try {
 
         const user_id = req.user_id;
-        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id),user_id);
+        const event = await EventService.getAnEvent(new mongoose.mongo.ObjectId(req.params.event_id), user_id);
         res.json({
             event: event,
             success: true
@@ -359,9 +359,18 @@ router.delete('/:event_id', passport.authenticate("jwt", {
 }), AuthMiddleware.isAdmin, async (req, res) => {
 
     try {
-
+        const event_id = new mongoose.mongo.ObjectId(req.params.event_id);
+        await EventService.deleteEvent(event_id);
+        res.json({
+            success: true,
+            message: "event deleted"
+        });
     } catch (error) {
         console.log(error);
+        res.json({
+            success: false,
+            message: 'Error: ' + error
+        })
     }
 
 })
