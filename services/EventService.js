@@ -8,11 +8,39 @@ const ParticipationTicket = require('../models/event/ParticipationTicket');
 const jwt = require("jsonwebtoken");
 const User = require("../models/user/User");
 const nodemailer = require("nodemailer");
+const QRCode = require('qrcode');
+const fs = require('fs');
 
+const SERVER_URL= process.env.FRONT_END_URL;
 const keysecret = process.env.JWT_SECRET;
-
 const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
+const EmailHTML = require("./EmailHTML")
+
+// const EmailTemplate = require("./beefree-4aqd7j91k52")
+
+function sendEmail(mailOptions){
+    return new Promise((resolve,reject)=>{
+    var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: sender_email,
+            pass: sender_email_pass
+        }
+    })
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log("error", error);
+            return reject({message:`An error has occured`})
+            //   res.status(401).json({status:401,message:"Email not sent"})
+        } else {
+            console.log("Email sent", info.response);
+            //   res.status(201).json({status:201,message:"Email sent successfully"});
+            return resolve ({message:`Email Sent Successfully`})
+        }
+    })})
+}
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -103,19 +131,11 @@ const createAnEvent = async (user_id, event_info) => {
                     to: userfind.email,
                     subject: "Sending Moderation Ticket For Event",
                     text: `
-                Link to access list of Event Moderators: http://localhost:3000/event/${savedEvent._id}/viewmembers
-                Link to accedd/edit Event Details: http://localhost:3000/event-creation/${savedEvent._id}`
+                Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
+                Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
                 }
 
-                transporter.sendMail(mailOptions, (error, info) => {
-                    if (error) {
-                        console.log("error", error);
-                        //   res.status(401).json({status:401,message:"Email not sent"})
-                    } else {
-                        console.log("Email sent", info.response);
-                        //   res.status(201).json({status:201,message:"Email sent successfully"});
-                    }
-                })
+                sendEmail(mailOptions);
             }
         } catch (error) {
             // res.status(401).json({status:401,message:"Invalid User"})
@@ -167,9 +187,43 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         const savedTicket = await newTicket.save();
 
         // email them the ticket
+        try {
+            const userfind = await UserService.getUser(el);
+            // console.log(userfind)
+            //token generate for reset password
+            const token = jwt.sign({
+                _id: userfind._id
+            }, keysecret, {
+                expiresIn: "30d"
+            });
 
+            const setusertoken = await User.findByIdAndUpdate({
+                _id: userfind._id
+            }, {
+                verifytoken: token
+            }, {
+                new: true
+            });
+            if (setusertoken) {
+                const mailOptions = {
+                    from: sender_email,
+                    to: userfind.email,
+                    subject: "Sending Moderation Ticket For Event",
+                    text: `
+                Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
+                Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
+                }
+
+                sendEmail(mailOptions)
+            }
+        } catch (error) {
+            // res.status(401).json({status:401,message:"Invalid User"})
+            console.log(error);
+        }
+        // /:event_id/edit
 
     })
+
 
 
     const savedEvent = await EventRepository.updateEventInfo(event_id, user_id, {
@@ -183,6 +237,29 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     return savedEvent;
 
 }
+
+//Generate QR code for registered participants
+
+
+const generateQRCode = async (ticketData) => {
+    try {
+      const qrCodeData = JSON.stringify(ticketData); // Convert ticket data to a JSON string
+      const qrCodeOptions = {
+        errorCorrectionLevel: 'H', // High error correction level
+        type: 'png', // Output QR code as PNG image
+        quality: 0.92, // Image quality (0.01 - 1.0)
+        margin: 1, // QR code margin
+      };
+  
+      const qrCodeImage = await QRCode.toFile('qrcode.png', qrCodeData, qrCodeOptions);
+      console.log('QR code generated successfully.');
+      console.log('QR code saved as qrcode.png');
+  
+      return qrCodeImage;
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+    }
+  };
 
 // register for an event
 const registerForEvent = async (user_id, event_id, registeration_info) => {
@@ -198,7 +275,62 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
     })
     await newRegisterationTicket.save();
 
+    //Generate QR Code
+
+    // const QRImage = generateQRCode(newRegisterationTicket);
+
+
+
+
+
     // email the ticket to the user
+    try {
+        const userfind = await UserService.getUser(user_id);
+        // console.log(userfind)
+        //token generate for reset password
+        const token = jwt.sign({
+            _id: user_id,
+        }, keysecret, {
+            expiresIn: "30d"
+        });
+
+        const setusertoken = await User.findByIdAndUpdate({
+            _id: user_id
+        }, {
+            verifytoken: token
+        }, {
+            new: true
+        });
+
+        //Create Email HTML Template
+        const event = await EventRepository.getEventById(event_id);
+        const newUser=await UserService.getUser(user_id);
+        const edit_link = `${SERVER_URL}/events/${savedEvent._id}`
+        var day = event.date_time.getDate(); 
+        var month = event.date_time.getMonth(); 
+        var year = event.date_time.getFullYear()
+        newDate= day+"/"+month+"/"+year
+        const html = await EmailHTML.createHTML(event.main_poster,newDate,edit_link,newUser.name.first_name,newUser.name.last_name);
+
+
+
+        //Email data Initialization
+        if (setusertoken) {
+            const mailOptions = {
+                from: sender_email,
+                to: userfind.email,
+                subject: "Sending Participation Ticket For Event",
+               
+                text: `Link to access list of Event Moderators: ${SERVER_URL}/events/${savedEvent._id}`,
+            html: html
+            }
+
+            sendEmail(mailOptions)
+        }
+    } catch (error) {
+        // res.status(401).json({status:401,message:"Invalid User"})
+        console.log(error);
+    }
 
 
     return savedEvent;
