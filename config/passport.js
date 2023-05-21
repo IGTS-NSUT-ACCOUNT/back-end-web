@@ -7,8 +7,8 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 
-const pathToKey = path.join(__dirname, "..", "id_rsa_pub.pem");
-const PUB_KEY = fs.readFileSync(pathToKey, "utf8");
+// const pathToKey = path.join(__dirname, "..", "id_rsa_pub.pem");
+const PUB_KEY = process.env.ID_RSA_PUBLIC_KEY
 
 // TODO
 const options = {

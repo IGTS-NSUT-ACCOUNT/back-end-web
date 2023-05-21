@@ -7,7 +7,9 @@ const getUserById = async (user_id) => {
 
 //   getUserByEmail() -
 const getUserByEmail = async (email_id) => {
-  const user = await User.findOne({ email: email_id });
+  const user = await User.findOne({
+    email: email_id
+  });
   return user;
 };
 
@@ -83,8 +85,20 @@ const removeBlogFromReadingList = async (user_id, blog_id) => {
   return updatedUser;
 };
 
-const registerUser = async ({ name, hash, salt, pfp_url, email }) => {
-  const user = new User({ name, hash, salt, pfp_url, email });
+const registerUser = async ({
+  name,
+  hash,
+  salt,
+  pfp_url,
+  email
+}) => {
+  const user = new User({
+    name,
+    hash,
+    salt,
+    pfp_url,
+    email
+  });
   const registeredUser = await user.save();
   return registeredUser;
 };
@@ -92,6 +106,20 @@ const registerUser = async ({ name, hash, salt, pfp_url, email }) => {
 const deleteUser = async (user_id) => {
   await User.findByIdAndDelete(user_id);
 };
+
+const registerUserForEvent = async (user_id, event_id) => {
+  const user = await getUserById(user_id);
+  user.registered_events(event_id);
+  const updatedUser = await user.save();
+  return updatedUser;
+}
+
+const unregisterUserForEvent = async (user_id, event_id) => {
+  const user = await getUserById(user_id);
+  user.registered_events = user.registered_events.filter((el) => !el.equals(event_id));
+  const updatedUser = await user.save();
+  return updatedUser;
+}
 
 module.exports = {
   getUserById,
@@ -106,4 +134,6 @@ module.exports = {
   registerUser,
   updatedUserPass,
   deleteUser,
+  registerUserForEvent,
+  unregisterUserForEvent,
 };

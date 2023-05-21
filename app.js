@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000"],
+    origin: [process.env.FRONT_END_URL],
   })
 );
 
@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 });
 app.use(routes);
 
-const port = 5005;
+const port = process.env.PORT || 5005;
 
 
 
