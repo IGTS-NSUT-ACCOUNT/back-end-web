@@ -40,7 +40,7 @@ app.use((req, res, next) => {
 });
 app.use(routes);
 
-const port = 5005;
+const port = process.env.PORT || 5005;
 
 
 
