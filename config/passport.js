@@ -7,6 +7,35 @@ const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 
+
+const {
+  SecretsManagerClient,
+  GetSecretValueCommand
+} = require("@aws-sdk/client-secrets-manager");
+const secret_name = "ID_RSA_PUBLIC_KEY";
+
+
+
+const client = new SecretsManagerClient({
+  region: "ap-south-1",
+});
+
+
+//   try {
+//     response = await client.send(
+//       new GetSecretValueCommand({
+//         SecretId: secret_name,
+//         VersionStage: "AWSCURRENT", // VersionStage defaults to AWSCURRENT if unspecified
+//       })
+//     );
+//     return response.SecretString;
+//   } catch (error) {
+//     // For a list of exceptions thrown, see
+//     // https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+//     throw error;
+//   }
+// const PUB_KEY = await f();
+
 // const pathToKey = path.join(__dirname, "..", "id_rsa_pub.pem");
 const PUB_KEY = process.env.ID_RSA_PUBLIC_KEY
 

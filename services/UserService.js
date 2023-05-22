@@ -1,12 +1,19 @@
 const UserRepository = require("./../repositories/UserRepository");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { genPassword, validPassword, issueJWT } = require("../lib/utils");
-const { uploadPfp } = require("../repositories/PfpRepository");
+const {
+  genPassword,
+  validPassword,
+  issueJWT
+} = require("../lib/utils");
+const {
+  uploadPfp
+} = require("../repositories/PfpRepository");
 
 // User Service
 // - getUser()
 const getUser = async (user_id) => {
+  console.log('h');
   return await UserRepository.getUserById(user_id);
 };
 const getUserByEmail = async (email) => {
@@ -26,7 +33,10 @@ const loginUser = async (email, password) => {
 // - registerUser()
 const registerUser = async (userBody) => {
   // generate password
-  const { salt, hash } = genPassword(userBody.password);
+  const {
+    salt,
+    hash
+  } = genPassword(userBody.password);
   // generate pfp
   const pfp_url = pickCuteMinimalPfpUrl();
   var userBody = {
@@ -70,19 +80,34 @@ const editUserProfilePicture = async (user_id, image) => {
 const editUserPass = async (user_id, old_pass, new_pass) => {
   const user = await UserRepository.getUserById(user_id);
   const isValid = validPassword(old_pass, user.hash, user.salt);
-  if (!isValid) return { success: false, message: "Old password dont match" };
+  if (!isValid) return {
+    success: false,
+    message: "Old password dont match"
+  };
 
-  const { salt, hash } = genPassword(new_pass);
+  const {
+    salt,
+    hash
+  } = genPassword(new_pass);
   const updatedUser = await UserRepository.updatedUserPass(user_id, hash, salt);
-  return { success: true, message: "successfully updated password" };
+  return {
+    success: true,
+    message: "successfully updated password"
+  };
 };
 
 const resetUserPass = async (user_id, new_pass) => {
   const user = await UserRepository.getUserById(user_id);
 
-  const { salt, hash } = genPassword(new_pass);
+  const {
+    salt,
+    hash
+  } = genPassword(new_pass);
   const updatedUser = await UserRepository.updatedUserPass(user_id, hash, salt);
-  return { success: true, message: "successfully updated password" };
+  return {
+    success: true,
+    message: "successfully updated password"
+  };
 };
 
 // - addBlogToReadingList()
@@ -124,12 +149,12 @@ function pickCuteMinimalPfpUrl(urls) {
   return randomPfpUrl;
 }
 
-const deleteUser = async(user_id)=>{
+const deleteUser = async (user_id) => {
   await UserRepository.deleteUser(user_id);
 }
 
-const registerUserForEvent = async(user_id,event_id)=>{
-  const updatedUser=await UserRepository.registerUserForEvent(user_id,event_id);
+const registerUserForEvent = async (user_id, event_id) => {
+  const updatedUser = await UserRepository.registerUserForEvent(user_id, event_id);
   return updatedUser;
 }
 
