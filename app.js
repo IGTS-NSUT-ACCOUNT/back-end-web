@@ -62,3 +62,7 @@ wss.on('connection', (ws) => {
     console.log('WebSocket connection closed.');
   });
 });
+
+server.on('listening', () => {
+  console.log('WebSocket server started');
+});
