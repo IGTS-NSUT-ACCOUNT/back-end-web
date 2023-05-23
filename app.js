@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 app.use(
   cors({
     credentials: true,
-    origin: process.env.FRONT_END_URL,
+    origin: 'https://igts-web.netlify.app',
   })
 );
 console.log(process.env.FRONT_END_URL)
