@@ -23,6 +23,7 @@
     "fs": "^0.0.1-security",
     "googleapis": "^118.0.0",
     "html-minifier": "^4.0.0",
+    "http": "^0.0.1-security",
     "is-empty": "^1.2.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.2.0",

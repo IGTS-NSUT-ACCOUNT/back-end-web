@@ -6,6 +6,9 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const passport = require("passport");
 const WebSocket = require('ws');
+const {
+  createServer
+} = require("http");
 require("dotenv").config();
 const app = express();
 
@@ -45,12 +48,11 @@ const port = process.env.PORT || 5005;
 
 
 
-const server = app.listen(port, () => {
-  console.log(`server started`);
-});
+const server = createServer(app);
+
 
 const wss = new WebSocket.Server({
-  server
+  server,
 });
 
 
@@ -66,3 +68,7 @@ wss.on('connection', (ws) => {
 server.on('listening', () => {
   console.log('WebSocket server started');
 });
+
+server.listen(port, () => {
+  console.log('Listenning');
+})
