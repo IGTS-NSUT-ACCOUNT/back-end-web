@@ -23,9 +23,10 @@ app.use(bodyParser.json());
 app.use(
   cors({
     credentials: true,
-    origin: [process.env.FRONT_END_URL, 'http://49.36.185.217:3000'],
+    origin: [process.env.FRONT_END_URL],
   })
 );
+console.log(process.env.FRONT_END_URL)
 
 // Pass the global passport object into the configuration function
 require("./config/passport")(passport);
