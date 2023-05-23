@@ -76,7 +76,7 @@ const strategy = new JwtStrategy(options, async (payload, done) => {
 const googleStrategy = new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL: process.env.GOOGLE_CALLBACK_URL,
+  callbackURL: process.env.GOOGLE_CLIENT_CALLBACK_URL,
   accessType: 'offline',
   prompt: 'consent'
 }, async (acesstoken, refreshtoken, profile, done) => {
