@@ -151,8 +151,12 @@ const getAllBlogs = async (editor_user_id) => {
 };
 
 const generateResultFromBlogIds = async (blog_ids) => {
+  console.log(blog_ids);
   const result = await Promise.all(
     blog_ids.map(async (el, i) => {
+    
+
+    
       var blog = await BlogRepository.getABlogSilent(el);
       return {
         title: blog.title,
