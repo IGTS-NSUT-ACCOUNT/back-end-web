@@ -388,6 +388,7 @@ router.post("/sendpasswordlink", async (req, res) => {
     }, keysecret, {
       expiresIn: "900s"
     });
+    console.log("token",token)
 
     const setusertoken = await User.findByIdAndUpdate({
       _id: userfind._id
@@ -396,7 +397,7 @@ router.post("/sendpasswordlink", async (req, res) => {
     }, {
       new: true
     });
-
+    console.log("id",userfind._id)
     if (setusertoken) {
       const mailOptions = {
         from: sender_email,
@@ -405,7 +406,7 @@ router.post("/sendpasswordlink", async (req, res) => {
         text: `This Link is Valid For 15 Minutes 
         ${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}`
       }
-
+      console.log("option",mailOptions)
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.log("error", error);
