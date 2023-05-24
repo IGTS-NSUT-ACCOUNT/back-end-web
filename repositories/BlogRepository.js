@@ -81,9 +81,7 @@ const getBlogsByNew = async (pge_no, limit) => {
 };
 
 const getAllBlogs = async () => {
-  const blogs = await Blog.find({
-      public: true
-    })
+  const blogs = await Blog.find()
     .sort({
       createdAt: -1
     })
