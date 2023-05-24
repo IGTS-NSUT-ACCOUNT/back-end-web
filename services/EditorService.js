@@ -3,9 +3,7 @@ const BlogRepository = require("./../repositories/BlogRepository");
 const UserRepository = require("./../repositories/UserRepository");
 const AdminRepository = require("./../repositories/AdminRepository");
 const SubtopicRepository = require("./../repositories/SubtopicRepository");
-const {
-  generateResultFromBlogIds
-} = require("./BlogService");
+
 // Editor Service
 // - publishBlog()
 const publishBlog = async (editor_user_id, body) => {
@@ -151,6 +149,25 @@ const getAllBlogs = async (editor_user_id) => {
     return result;
   }
 };
+
+const generateResultFromBlogIds = async (blog_ids) => {
+  const result = await Promise.all(
+    blog_ids.map(async (el, i) => {
+      var blog = await BlogRepository.getABlogSilent(el);
+      return {
+        title: blog.title,
+        content: blog.content,
+        thumbnail: blog.thumbnail,
+        subtopics: blog.subtopics,
+        blog_id: blog._id,
+        editor_user_id: blog.editor_user_id,
+      };
+    })
+  );
+
+  return result;
+}
+
 
 const searchBlogs = async (query, editor_user_id) => {
   const blogs = await BlogRepository.searchBlogsByTitle(query, 0, 5000);
