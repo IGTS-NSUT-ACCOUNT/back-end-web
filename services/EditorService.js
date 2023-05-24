@@ -161,6 +161,7 @@ const generateResultFromBlogIds = async (blog_ids) => {
         subtopics: blog.subtopics,
         blog_id: blog._id,
         editor_user_id: blog.editor_user_id,
+        public: blog.public
       };
     })
   );
