@@ -75,7 +75,7 @@ const isEditorOfTheBlog = async (req, res, next) => {
   try {
     let blog_id = req.params.blogId;
     console.log(blog_id);
-    blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
+    blog_id = new mongoose.mongo.ObjectId(blog_id);
     let blog = await BlogService.getABlogSilent(blog_id);
     // console.log(blog.editor_user_id.equals(req.user._id));
     if (
