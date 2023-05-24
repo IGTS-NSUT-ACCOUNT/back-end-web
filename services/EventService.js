@@ -123,7 +123,7 @@ const createAnEvent = async (user_id, event_info) => {
             }, keysecret, {
                 expiresIn: "30d"
             });
-            
+
             const setusertoken = await User.findByIdAndUpdate({
                 _id: userfind._id
             }, {
@@ -140,7 +140,7 @@ const createAnEvent = async (user_id, event_info) => {
                     Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
                     Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
                 }
-                
+
                 console.log(mailOptions);
                 sendEmail(mailOptions);
             }
@@ -168,7 +168,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     if (event_info.event_moderators)
         event_info.event_moderators = [];
 
-    const toBeDeletedTickets = event.event_moderators.filter((el, i) => event_info.moderator_ids.includes(el.toString()));
+    const toBeDeletedTickets = event.event_moderators.filter((el, i) => event_info.event_moderators.includes(el.toString()));
 
     toBeDeletedTickets.forEach(async (el) => {
         await ModeratorTicket.findOneAndDelete({
@@ -176,7 +176,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
             user_id: el
         });
     })
-    const deletedRemoved = event.event_moderators.filter((el, i) => !event_info.moderator_ids.includes(el.toString()));
+    const deletedRemoved = event.event_moderators.filter((el, i) => !event_info.event_moderators.includes(el.toString()));
     event.event_moderators = deletedRemoved;
     await event.save();
 
