@@ -80,6 +80,16 @@ const getBlogsByNew = async (pge_no, limit) => {
   return blogs;
 };
 
+const getAllBlogs = async () => {
+  const blogs = await Blog.find({
+      public: true
+    })
+    .sort({
+      createdAt: -1
+    })
+  return blogs;
+}
+
 //  - getBlogsByPopular
 const getBlogsByPopular = async (pge_no, limit) => {
   const blogs = await Blog.find({
@@ -184,4 +194,5 @@ module.exports = {
   removeLike,
   deleteBlog,
   getComments,
+  getAllBlogs
 };

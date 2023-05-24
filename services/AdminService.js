@@ -37,7 +37,7 @@ const searchBlogs = async (query) => {
   return blogs;
 };
 const getAllBlogs = async () => {
-  const blogs = await BlogRepository.getBlogsByNew(0, 5000);
+  const blogs = await BlogRepository.getAllBlogs();
   return blogs;
 };
 module.exports = {
