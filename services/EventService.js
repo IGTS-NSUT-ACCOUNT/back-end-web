@@ -11,7 +11,7 @@ const nodemailer = require("nodemailer");
 const QRCode = require('qrcode');
 const fs = require('fs');
 const UserRepository = require('./../repositories/UserRepository');
-const SERVER_URL= process.env.FRONT_END_URL;
+const SERVER_URL = process.env.FRONT_END_URL;
 const keysecret = process.env.JWT_SECRET;
 const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
@@ -19,27 +19,32 @@ const EmailHTML = require("./EmailHTML")
 
 // const EmailTemplate = require("./beefree-4aqd7j91k52")
 
-function sendEmail(mailOptions){
-    return new Promise((resolve,reject)=>{
-    var transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: sender_email,
-            pass: sender_email_pass
-        }
-    })
+function sendEmail(mailOptions) {
+    return new Promise((resolve, reject) => {
+        var transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: sender_email,
+                pass: sender_email_pass
+            }
+        })
 
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            console.log("error", error);
-            return reject({message:`An error has occured`})
-            //   res.status(401).json({status:401,message:"Email not sent"})
-        } else {
-            console.log("Email sent", info.response);
-            //   res.status(201).json({status:201,message:"Email sent successfully"});
-            return resolve ({message:`Email Sent Successfully`})
-        }
-    })})
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                console.log("error", error);
+                return reject({
+                    message: `An error has occured`
+                })
+                //   res.status(401).json({status:401,message:"Email not sent"})
+            } else {
+                console.log("Email sent", info.response);
+                //   res.status(201).json({status:201,message:"Email sent successfully"});
+                return resolve({
+                    message: `Email Sent Successfully`
+                })
+            }
+        })
+    })
 }
 
 const transporter = nodemailer.createTransport({
@@ -93,7 +98,7 @@ const createAnEvent = async (user_id, event_info) => {
         date_time: new Date(event_info.date_time),
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_moderators: user_ids,
+        event_moderators: user_ids ? user_ids : [],
         location: event_info.location,
         event_photos: event_info.event_photos
     })
@@ -154,6 +159,13 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     const event = await EventRepository.getEventById(event_id);
 
     // delete removed tickets
+
+    if (!event.event_moderators)
+        event.event_moderators = [];
+
+    if (event_info.event_moderators)
+        event_info.event_moderators = [];
+
     const toBeDeletedTickets = event.event_moderators.filter((el, i) => event_info.moderator_ids.includes(el.toString()));
 
     toBeDeletedTickets.forEach(async (el) => {
@@ -167,6 +179,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     await event.save();
 
     // add the new tickets
+
     const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(new mongoose.mongo.ObjectId(el)))
     const user_ids = [];
     ticketsToBeAdded.map(async (element) => {
@@ -176,7 +189,6 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     });
     event.event_moderators += user_ids;
     await event.save();
-
 
     // tickets
     user_ids.forEach(async (el) => {
@@ -243,23 +255,23 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
 
 const generateQRCode = async (ticketData) => {
     try {
-      const qrCodeData = JSON.stringify(ticketData); // Convert ticket data to a JSON string
-      const qrCodeOptions = {
-        errorCorrectionLevel: 'H', // High error correction level
-        type: 'png', // Output QR code as PNG image
-        quality: 0.92, // Image quality (0.01 - 1.0)
-        margin: 1, // QR code margin
-      };
-  
-      const qrCodeImage = await QRCode.toFile('qrcode.png', qrCodeData, qrCodeOptions);
-      console.log('QR code generated successfully.');
-      console.log('QR code saved as qrcode.png');
-  
-      return qrCodeImage;
+        const qrCodeData = JSON.stringify(ticketData); // Convert ticket data to a JSON string
+        const qrCodeOptions = {
+            errorCorrectionLevel: 'H', // High error correction level
+            type: 'png', // Output QR code as PNG image
+            quality: 0.92, // Image quality (0.01 - 1.0)
+            margin: 1, // QR code margin
+        };
+
+        const qrCodeImage = await QRCode.toFile('qrcode.png', qrCodeData, qrCodeOptions);
+        console.log('QR code generated successfully.');
+        console.log('QR code saved as qrcode.png');
+
+        return qrCodeImage;
     } catch (error) {
-      console.error('Error generating QR code:', error);
+        console.error('Error generating QR code:', error);
     }
-  };
+};
 
 // register for an event
 const registerForEvent = async (user_id, event_id, registeration_info) => {
@@ -308,13 +320,13 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
 
         //Create Email HTML Template
         const event = await EventRepository.getEventById(event_id);
-        const newUser=await UserService.getUser(user_id);
+        const newUser = await UserService.getUser(user_id);
         const edit_link = `${SERVER_URL}/events/${savedEvent._id}`
-        var day = event.date_time.getDate(); 
-        var month = event.date_time.getMonth(); 
+        var day = event.date_time.getDate();
+        var month = event.date_time.getMonth();
         var year = event.date_time.getFullYear()
-        newDate= day+"/"+month+"/"+year
-        const html = await EmailHTML.createHTML(event.main_poster,newDate,edit_link,newUser.name.first_name,newUser.name.last_name);
+        newDate = day + "/" + month + "/" + year
+        const html = await EmailHTML.createHTML(event.main_poster, newDate, edit_link, newUser.name.first_name, newUser.name.last_name);
 
 
 
@@ -324,9 +336,9 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
                 from: sender_email,
                 to: userfind.email,
                 subject: "Sending Participation Ticket For Event",
-               
+
                 text: `Link to access list of Event Moderators: ${SERVER_URL}/events/${savedEvent._id}`,
-            html: html
+                html: html
             }
 
             sendEmail(mailOptions)
@@ -426,7 +438,7 @@ const deleteRegistrationOfUser = async (event_id, user_id) => {
 
     // delete it from the event's registered users list
     await UserRepository.unregisterUserForEvent(user_id, event_id);
-    
+
     await EventRepository.deleteRegistrationOfUser(event_id, user_id);
 
 }
