@@ -106,6 +106,7 @@ const createAnEvent = async (user_id, event_info) => {
         })
         const savedTicket = await newTicket.save();
 
+        console.log(1)
         // email them the ticket
 
         try {
@@ -117,7 +118,7 @@ const createAnEvent = async (user_id, event_info) => {
             }, keysecret, {
                 expiresIn: "30d"
             });
-
+            
             const setusertoken = await User.findByIdAndUpdate({
                 _id: userfind._id
             }, {
@@ -131,10 +132,11 @@ const createAnEvent = async (user_id, event_info) => {
                     to: userfind.email,
                     subject: "Sending Moderation Ticket For Event",
                     text: `
-                Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
-                Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
+                    Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
+                    Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
                 }
-
+                
+                console.log(mailOptions);
                 sendEmail(mailOptions);
             }
         } catch (error) {
