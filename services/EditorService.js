@@ -152,23 +152,26 @@ const getAllBlogs = async (editor_user_id) => {
 
 const generateResultFromBlogIds = async (blog_ids) => {
   console.log(blog_ids);
-  const result = await Promise.all(
+  let result = await Promise.all(
     blog_ids.map(async (el, i) => {
-    
 
-    
+
       var blog = await BlogRepository.getABlogSilent(el);
-      return {
-        title: blog.title,
-        content: blog.content,
-        thumbnail: blog.thumbnail,
-        subtopics: blog.subtopics,
-        blog_id: blog._id,
-        editor_user_id: blog.editor_user_id,
-        public: blog.public
-      };
+
+      if (blog)
+        return {
+          title: blog.title,
+          content: blog.content,
+          thumbnail: blog.thumbnail,
+          subtopics: blog.subtopics,
+          blog_id: blog._id,
+          editor_user_id: blog.editor_user_id,
+          public: blog.public
+        };
     })
   );
+
+  result = result.filter((el) => el != null)
 
   return result;
 }
