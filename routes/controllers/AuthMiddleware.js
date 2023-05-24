@@ -71,21 +71,32 @@ const isCommentWriter = async (req, res, next) => {
 //   isEditorOfTheBlog;
 const isEditorOfTheBlog = async (req, res, next) => {
 
-  let blog_id = req.params.blogId;
-  blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
-  let blog = await BlogService.getABlogSilent(blog_id);
-  // console.log(blog.editor_user_id.equals(req.user._id));
-  if (
-    req.isAuthenticated() &&
-    (blog.editor_user_id === (req.user._id) || req.user.role === "ADMIN")
-  ) {
-    next();
-  } else {
-    res.status(401).json({
-      message: "You are not authorized to view this resource",
+
+  try {
+    let blog_id = req.params.blogId;
+    console.log(blog_id);
+    blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
+    let blog = await BlogService.getABlogSilent(blog_id);
+    // console.log(blog.editor_user_id.equals(req.user._id));
+    if (
+      req.isAuthenticated() &&
+      (blog.editor_user_id === (req.user._id) || req.user.role === "ADMIN")
+    ) {
+      next();
+    } else {
+      res.status(401).json({
+        message: "You are not authorized to view this resource",
+        success: false,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    res.json({
       success: false,
-    });
+      message: `Error: ${error}`
+    })
   }
+
 };
 
 const isModeratorOfTheEvent = async (req, res, next) => {
