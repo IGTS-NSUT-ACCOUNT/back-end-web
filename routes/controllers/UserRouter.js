@@ -404,8 +404,8 @@ router.post("/sendpasswordlink", async (req, res) => {
         from: sender_email,
         to: setusertoken.email,
         subject: "Sending Email for password Reset",
-        text: `This Link is Valid For 15 Minutes 
-        ${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}`
+        html: `<h1>This Link is Valid For 15 Minutes </h1>
+        <a href="${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}"> Click Here </a>`
       }
       console.log("option",mailOptions)
       transporter.sendMail(mailOptions, (error, info) => {
