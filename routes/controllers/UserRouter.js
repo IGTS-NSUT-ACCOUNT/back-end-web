@@ -398,6 +398,7 @@ router.post("/sendpasswordlink", async (req, res) => {
       new: true
     });
     console.log("id",userfind._id)
+    console.log("usertoken",setusertoken)
     if (setusertoken) {
       const mailOptions = {
         from: sender_email,
