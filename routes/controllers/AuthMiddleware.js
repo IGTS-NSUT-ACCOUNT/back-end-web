@@ -70,9 +70,9 @@ const isCommentWriter = async (req, res, next) => {
 
 //   isEditorOfTheBlog;
 const isEditorOfTheBlog = async (req, res, next) => {
-  console.log("hh");
+
   let blog_id = req.params.blogId;
-  if (!blog_id) blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
+  blog_id = new mongoose.mongo.ObjectId(req.body.blog_id);
   let blog = await BlogService.getABlogSilent(blog_id);
   // console.log(blog.editor_user_id.equals(req.user._id));
   if (
