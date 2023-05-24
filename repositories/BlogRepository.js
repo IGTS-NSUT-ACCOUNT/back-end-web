@@ -126,7 +126,9 @@ const updateBlog = async ({
   return savedBlog;
 };
 const getABlogSilent = async (blog_id) => {
+  console.log(blog_id);
   const blog = await Blog.findById(blog_id);
+  console.log(blog);
   return blog;
 };
 
