@@ -109,7 +109,7 @@ const deleteUser = async (user_id) => {
 
 const registerUserForEvent = async (user_id, event_id) => {
   const user = await getUserById(user_id);
-  user.registered_events(event_id);
+  user.registered_events.push(event_id);
   const updatedUser = await user.save();
   return updatedUser;
 }
