@@ -160,6 +160,12 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
 
     const event = await EventRepository.getEventById(event_id);
 
+    event_info.event_moderators = await Promise.all((el)=>{
+        const user = UserRepository.getUserByEmail(el);
+        return user.user_id;
+    });
+
+    console.log(event_info.event_moderators)
     // delete removed tickets
 
     if (!event.event_moderators)
@@ -181,9 +187,8 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     await event.save();
 
     // add the new tickets
-    console.log("event_info",event_info.event_moderators);
-    console.log("event",event.event_moderators);
-    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(el))
+
+    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(new mongoose.mongo.ObjectId(el)))
     var user_ids = [];
     ticketsToBeAdded.map(async (element) => {
         const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
