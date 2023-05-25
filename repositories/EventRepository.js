@@ -10,7 +10,7 @@ const parseGoogleDriveUrl = (url)=> {
     // Extract the file ID from the URL.
     const fileId = url.split("/d/")[1].split("/")[0];
   
-    return `https://drive.google.com/uc?id=${fileId}`
+    return `https://drive.google.com/uc?export=view&id=${fileId}`
     // // Create a new Google Drive API client.
     // const drive = new google.drive.Drive();
   
@@ -38,7 +38,7 @@ const createEvent = async (user_id, {
     const newEvent = new Event({
         event_title,
         date_time,
-        poster_url_parsed,
+        main_poster:poster_url_parsed,
         details,
         event_moderators,
         created_by: user_id,
