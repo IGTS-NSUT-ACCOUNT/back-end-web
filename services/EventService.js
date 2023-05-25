@@ -160,10 +160,10 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
 
     const event = await EventRepository.getEventById(event_id);
 
-    event_info.event_moderators = await Promise.all((el)=>{
+    event_info.event_moderators = await Promise.all(event_info.event_moderators.map((el)=>{
         const user = UserRepository.getUserByEmail(el);
         return user.user_id;
-    });
+    }));
 
     console.log(event_info.event_moderators)
     // delete removed tickets
