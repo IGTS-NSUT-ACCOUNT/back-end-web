@@ -1,5 +1,26 @@
 const Event = require('./../models/event/Event');
 
+
+const parseGoogleDriveUrl = async (url) {
+    // Check if the URL is a Google Drive URL.
+    if (!url.startsWith("https://drive.google.com/file/d/")) {
+      return null;
+    }
+  
+    // Extract the file ID from the URL.
+    const fileId = url.split("/d/")[1].split("/")[0];
+  
+    return `https://drive.google.com/uc?id=${fileId}`
+    // // Create a new Google Drive API client.
+    // const drive = new google.drive.Drive();
+  
+    // // Get the file by ID.
+    // const file = await drive.files.get(fileId);
+  
+    // // Return the file's direct link.
+    // return file.webViewLink;
+  }
+
 // create event
 const createEvent = async (user_id, {
     event_title,
@@ -11,14 +32,17 @@ const createEvent = async (user_id, {
     location
 }) => {
     console.log(event_photos)
+
+    const photos_url_parsed = await Promise.all(event_photos.map(parseGoogleDriveUrl()));
+    const poster_url_parsed= await Promise.all(parseGoogleDriveUrl(main_poster));
     const newEvent = new Event({
         event_title,
         date_time,
-        main_poster,
+        poster_url_parsed,
         details,
         event_moderators,
         created_by: user_id,
-        event_photos: event_photos,
+        event_photos: photos_url_parsed,
         location: location
     });
     console.log(newEvent);
