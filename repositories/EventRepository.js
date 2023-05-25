@@ -69,7 +69,7 @@ const updateEventInfo = async (event_id, user_id, {
     const photos_url_parsed = event_photos.map((photo)=>{return parseGoogleDriveUrl(photo)});
     const poster_url_parsed= parseGoogleDriveUrl(main_poster);
 
-    var event = getEventById(event_id);
+    var event =await getEventById(event_id);
     console.log("check",event);
     event = {
         ...event,
