@@ -181,8 +181,9 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     await event.save();
 
     // add the new tickets
-
-    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(new mongoose.mongo.ObjectId(el)))
+    console.log("event_info",event_info.event_moderators);
+    console.log("event",event.event_moderators);
+    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(el))
     var user_ids = [];
     ticketsToBeAdded.map(async (element) => {
         const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
