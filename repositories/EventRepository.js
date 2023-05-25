@@ -36,6 +36,7 @@ const updateEventInfo = async (event_id, user_id, {
     event_title,
     date_time,
     main_poster,
+    event_moderators,
     event_photos,
     details,
     location,
@@ -48,6 +49,7 @@ const updateEventInfo = async (event_id, user_id, {
         date_time,
         main_poster,
         details,
+        event_moderators,
         location,
         created_by: user_id
     }
