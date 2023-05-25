@@ -1,3 +1,4 @@
+const { events } = require('./../models/event/Event');
 const Event = require('./../models/event/Event');
 
 
@@ -71,17 +72,26 @@ const updateEventInfo = async (event_id, user_id, {
 
     var event =await getEventById(event_id);
     console.log("check",event);
-    event = {
-        ...event,
-        event_title,
-        event_photos:photos_url_parsed,
-        date_time,
-        main_poster:poster_url_parsed,
-        details,
-        event_moderators,
-        location,
-        created_by: user_id
-    }
+    // event = {
+    //     ...event,
+    //     event_title,
+    //     event_photos:photos_url_parsed,
+    //     date_time,
+    //     main_poster:poster_url_parsed,
+    //     details,
+    //     event_moderators,
+    //     location,
+    //     created_by: user_id
+    // }
+    event.event_title=event_title;
+    event.date_time=date_time;
+    event.event_photos=photos_url_parsed;
+    event.event.main_poster=poster_url_parsed;
+    event.details=details;
+    event.event_moderators=event_moderators;
+    events.location=location;
+    event.created_by= user_id;
+
     console.log(event);
     const savedEvent = await event.save();
     return savedEvent;
