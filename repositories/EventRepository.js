@@ -1,7 +1,7 @@
 const Event = require('./../models/event/Event');
 
 
-const parseGoogleDriveUrl = async (url) {
+const parseGoogleDriveUrl = async (url)=> {
     // Check if the URL is a Google Drive URL.
     if (!url.startsWith("https://drive.google.com/file/d/")) {
       return url;
