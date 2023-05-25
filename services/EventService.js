@@ -192,6 +192,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     var user_ids = [];
     ticketsToBeAdded.map(async (element) => {
         const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
+        console.log(user);
         if (user.society_member)
             user_ids.push(user._id);
     });
