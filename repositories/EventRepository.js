@@ -70,6 +70,7 @@ const updateEventInfo = async (event_id, user_id, {
     const poster_url_parsed= parseGoogleDriveUrl(main_poster);
 
     var event = await getEventById(event_id);
+    console.log(event);
     event = {
         ...event,
         event_title,
