@@ -65,13 +65,17 @@ const updateEventInfo = async (event_id, user_id, {
     details,
     location,
 }) => {
+
+    const photos_url_parsed = event_photos.map((photo)=>{return parseGoogleDriveUrl(photo)});
+    const poster_url_parsed= parseGoogleDriveUrl(main_poster);
+
     var event = await getEventById(event_id);
     event = {
         ...event,
         event_title,
-        event_photos,
+        event_photos:photos_url_parsed,
         date_time,
-        main_poster,
+        main_poster:poster_url_parsed,
         details,
         event_moderators,
         location,
