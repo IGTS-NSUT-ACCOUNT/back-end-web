@@ -183,7 +183,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     // add the new tickets
 
     const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(new mongoose.mongo.ObjectId(el)))
-    const user_ids = [];
+    var user_ids = [];
     ticketsToBeAdded.map(async (element) => {
         const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
         if (user.society_member)
@@ -245,7 +245,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         date_time: event_info.date_time,
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_photos : event_info.event_photos
+        event_photos: event_info.event_photos
     });
 
     return savedEvent;
