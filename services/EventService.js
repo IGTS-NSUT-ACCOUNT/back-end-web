@@ -245,7 +245,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         date_time: event_info.date_time,
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_photos,
+        event_photos : event_info.event_photos
     });
 
     return savedEvent;
