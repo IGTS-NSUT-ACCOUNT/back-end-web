@@ -165,7 +165,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
     if (!event.event_moderators)
         event.event_moderators = [];
 
-    if (event_info.event_moderators)
+    if (!event_info.event_moderators)
         event_info.event_moderators = [];
 
     const toBeDeletedTickets = event.event_moderators.filter((el, i) => event_info.event_moderators.includes(el.toString()));
