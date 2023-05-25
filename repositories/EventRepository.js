@@ -69,7 +69,7 @@ const updateEventInfo = async (event_id, user_id, {
     const photos_url_parsed = event_photos.map((photo)=>{return parseGoogleDriveUrl(photo)});
     const poster_url_parsed= parseGoogleDriveUrl(main_poster);
 
-    var event = await getEventById(event_id);
+    var event = getEventById(event_id);
     console.log(event);
     event = {
         ...event,
@@ -82,6 +82,7 @@ const updateEventInfo = async (event_id, user_id, {
         location,
         created_by: user_id
     }
+    console.log(event);
     const savedEvent = await event.save();
     return savedEvent;
 }
