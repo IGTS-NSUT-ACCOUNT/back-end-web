@@ -160,8 +160,8 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
 
     const event = await EventRepository.getEventById(event_id);
 
-    event_info.event_moderators = await Promise.all(event_info.event_moderators.map((el)=>{
-        const user = UserRepository.getUserByEmail(el);
+    event_info.event_moderators = await Promise.all(event_info.event_moderators.map(async(el)=>{
+        const user = await UserRepository.getUserByEmail(el);
         return user._id;
     }));
 
