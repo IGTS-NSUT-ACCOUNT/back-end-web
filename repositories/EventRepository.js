@@ -52,7 +52,7 @@ const updateEventInfo = async (event_id, user_id, {
         created_by: user_id
     }
     const savedEvent = await event.save();
-    return event;
+    return savedEvent;
 }
 // update registration closed
 const enableRegistration = async (event_id) => {
