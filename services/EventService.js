@@ -449,6 +449,7 @@ const getAnEventDraft = async (event_id) => {
     console.log("event_id", event_id);
     const event = await EventRepository.getEventById(event_id);
     const list = []
+    console.log("event",event)
     event.event_moderators.map(async (el) => {
         const user = await UserService.getUser(el);
         list.push(user.email);
