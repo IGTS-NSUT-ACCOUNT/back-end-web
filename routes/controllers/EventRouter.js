@@ -340,6 +340,7 @@ router.get('/:event_id/draft', passport.authenticate("jwt", {
 }), AuthMiddleware.isModeratorOfTheEvent, async (req, res) => {
     try {
         const event = await EventService.getAnEventDraft(new mongoose.mongo.ObjectId(req.params.event_id));
+        console.log(event)
         res.json({
             event: event,
             success: true
