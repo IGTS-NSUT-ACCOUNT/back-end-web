@@ -1,7 +1,7 @@
 const Event = require('./../models/event/Event');
 
 
-const parseGoogleDriveUrl = async (url)=> {
+const parseGoogleDriveUrl = (url)=> {
     // Check if the URL is a Google Drive URL.
     if (!url.startsWith("https://drive.google.com/file/d/")) {
       return url;
@@ -33,8 +33,8 @@ const createEvent = async (user_id, {
 }) => {
     console.log(event_photos)
 
-    const photos_url_parsed = await Promise.all(event_photos.map(parseGoogleDriveUrl()));
-    const poster_url_parsed= await Promise.all(parseGoogleDriveUrl(main_poster));
+    const photos_url_parsed = event_photos.map((photo)=>{return parseGoogleDriveUrl(photo)});
+    const poster_url_parsed= parseGoogleDriveUrl(main_poster);
     const newEvent = new Event({
         event_title,
         date_time,
