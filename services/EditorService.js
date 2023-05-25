@@ -54,7 +54,21 @@ const publishBlog = async (editor_user_id, body) => {
 };
 
 // - deleteBlog()
-const deleteBlog = async (blog_id) => {
+const deleteBlog = async (editor_user_id, role, blog_id) => {
+
+  // delte blog id from editor
+  if (role === 'EDITOR') {
+    await EditorRepository.deleteBlog(editor_user_id, blog_id);
+  } else if (role === 'ADMIN') {
+    await AdminRepository.deleteBlog(editor_user_id, blog_id);
+  }
+
+  const blog = await BlogRepository.getABlogSilent(blog_id);
+  // delte blog from its subtopic
+  blog.subtopics.forEach(async (el) => {
+    await SubtopicRepository.deleteBlog(el.subtopic_id, blog_id);
+  });
+
   await BlogRepository.deleteBlog(blog_id);
 };
 

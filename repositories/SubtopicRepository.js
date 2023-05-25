@@ -2,7 +2,9 @@ const Subtopic = require("./../models/blog/Subtopic");
 
 // - addNewSubtopic()
 const addNewSubtopic = async (name) => {
-  const subtopic = new Subtopic({ name });
+  const subtopic = new Subtopic({
+    name
+  });
   const savedSubtopic = await subtopic.save();
   return savedSubtopic;
 };
@@ -32,22 +34,18 @@ const getSubtopicById = async (subtopic_id) => {
 
 // - getSubtopic() // search function
 const getSubtopic = async (query) => {
-  let results = await Subtopic.aggregate([
-    {
-      $search: {
-        compound: {
-          should: [
-            {
-              autocomplete: {
-                query: query,
-                path: "name",
-              },
-            },
-          ],
-        },
+  let results = await Subtopic.aggregate([{
+    $search: {
+      compound: {
+        should: [{
+          autocomplete: {
+            query: query,
+            path: "name",
+          },
+        }, ],
       },
     },
-  ]);
+  }, ]);
 
   return results;
 };
@@ -57,6 +55,11 @@ const getAllSubtopics = async () => {
   return subtopics;
 };
 
+const deleteBlog = async (subtopic_id, blog_id) => {
+  const subtopic = await getSubtopicById(subtopic_id);
+  subtopic.blog_ids = subtopic.blog_ids.filter((el) => !el.equals(blog_id));
+}
+
 module.exports = {
   addNewSubtopic,
   addBlogId,
@@ -65,4 +68,5 @@ module.exports = {
   getSubtopic,
   getSubtopicById,
   getAllSubtopics,
+  deleteBlog
 };

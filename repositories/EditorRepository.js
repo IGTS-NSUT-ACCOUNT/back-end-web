@@ -4,13 +4,17 @@ const Editor = require("./../models/user/Editor");
 
 // - registerEditor()
 const registerEditor = async (user_id) => {
-  const editor = new Editor({ user_id });
+  const editor = new Editor({
+    user_id
+  });
   const savedEditor = await editor.save();
   return savedEditor;
 };
 
 const getEditorByUserId = async (user_id) => {
-  const editor = await Editor.findOne({ user_id: user_id });
+  const editor = await Editor.findOne({
+    user_id: user_id
+  });
   return editor;
 };
 
@@ -42,8 +46,16 @@ const getBlogIds = async (user_id) => {
 };
 
 const deleteEditor = async (user_id) => {
-  await Editor.findOneAndDelete({ user_id: user_id });
+  await Editor.findOneAndDelete({
+    user_id: user_id
+  });
 };
+
+const deleteBlog = async (user_id, blog_id) => {
+  const editor = await getEditorByUserId(user_id);
+  editor.blog_ids = editor.blog_ids.filter((el) => !el.equals(blog_id));
+  await editor.save();
+}
 
 module.exports = {
   registerEditor,
@@ -53,4 +65,5 @@ module.exports = {
   removeBlogId,
   getBlogIds,
   deleteEditor,
+  deleteBlog
 };
