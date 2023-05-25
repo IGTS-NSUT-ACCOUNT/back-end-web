@@ -111,7 +111,6 @@ const createAnEvent = async (user_id, event_info) => {
         })
         const savedTicket = await newTicket.save();
 
-        console.log(1)
         // email them the ticket
 
         try {
@@ -252,8 +251,18 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         date_time: event_info.date_time,
         main_poster: event_info.main_poster,
         details: event_info.details,
-        event_photos: event_info.event_photos
+        event_photos: event_info.event_photos,
+        event_moderators: event.event_moderators,
+        location: event_info.location,
     });
+
+    // event_title,
+    // date_time,
+    // main_poster,
+    // event_moderators,
+    // event_photos,
+    // details,
+    // location,
 
     return savedEvent;
 
