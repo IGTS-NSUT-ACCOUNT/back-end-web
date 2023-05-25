@@ -448,12 +448,14 @@ const deleteRegistrationOfUser = async (event_id, user_id) => {
 const getAnEventDraft = async (event_id) => {
     console.log("event_id", event_id);
     const event = await EventRepository.getEventById(event_id);
-    const list = []
+    // const list = []
     console.log("event",event)
-    event.event_moderators.map(async (el) => {
-        const user = await UserService.getUser(el);
-        list.push(user.email);
-    })
+    const getEmail = async (moderator) => {
+        const user = await UserService.getUser(moderator);
+        return user.email;
+    };
+    
+    const list = await Promise.all(event.event_moderators.map(getEmail));
 
     const event2 = event.toObject();
     event2.event_moderators = list;
