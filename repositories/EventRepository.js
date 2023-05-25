@@ -40,7 +40,7 @@ const updateEventInfo = async (event_id, user_id, {
     details,
     location,
 }) => {
-    const event = await getEventById(event_id);
+    var event = await getEventById(event_id);
     event = {
         ...event,
         event_title,
