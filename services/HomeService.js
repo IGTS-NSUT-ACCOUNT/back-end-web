@@ -10,7 +10,7 @@ const getHighlights = async () => {
       return {
         type: "blog",
         title: el.title,
-        description: el.content.slice(0, 200),
+        description: el.content.slice(0, 500),
         thumbnail: el.thumbnail,
         id: el._id,
         date: el.createdAt
@@ -18,7 +18,7 @@ const getHighlights = async () => {
     else return {
       type: "event",
       title: el.event_title,
-      description: el.details.slice(0, 200),
+      description: el.details.slice(0, 500),
       thumbnail: el.main_poster,
       id: el._id,
       date: el.createdAt
