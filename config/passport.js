@@ -85,10 +85,23 @@ const googleStrategy = new GoogleStrategy({
   });
   let user;
   if (!newUser) {
+
+    let name = {
+      first_name: '',
+      last_name: profile.displayName
+    };
+
+    if (profile.displayName.split(' ').length >= 2) {
+      const displayNameSplit = profile.displayName.split(' ');
+      name = {
+        first_name: displayNameSplit.slice(0, -1).join(' '),
+        last_name: displayNameSplit.slice(-1)[0]
+      };
+    }
+
     user = await UserService.registerUser({
-      name: {
-        last_name: profile.displayName
-      },
+
+      name,
       email: profile.emails[0].value,
       password: generatePassword(16),
 

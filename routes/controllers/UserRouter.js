@@ -375,6 +375,7 @@ router.post("/sendpasswordlink", async (req, res) => {
   if (!email) {
     res.status(401).json({
       status: 401,
+      success: false,
       message: "Enter your email"
     })
   }
@@ -388,7 +389,7 @@ router.post("/sendpasswordlink", async (req, res) => {
     }, keysecret, {
       expiresIn: "900s"
     });
-    console.log("token",token)
+    console.log("token", token)
 
     const setusertoken = await User.findByIdAndUpdate({
       _id: userfind._id
@@ -397,17 +398,60 @@ router.post("/sendpasswordlink", async (req, res) => {
     }, {
       new: true
     });
-    console.log("id",userfind._id)
-    console.log("usertoken",setusertoken)
+    console.log("id", userfind._id)
+    console.log("usertoken", setusertoken)
     if (setusertoken) {
       const mailOptions = {
         from: sender_email,
         to: setusertoken.email,
-        subject: "Sending Email for password Reset",
-        html: `<h1>This Link is Valid For 15 Minutes </h1>
-        <a href="${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}"> Click Here </a>`
+        subject: "Reset Password",
+        html: `<style>
+  body {
+    font-family: Arial, sans-serif;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  h1 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .link-container {
+    margin-bottom: 20px;
+  }
+
+  .link-container a {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+  }
+
+  .link-container a:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<body>
+  <div class="container">
+    <h1>This Link is Valid For 15 Minutes</h1>
+    <div class="link-container">
+      <a href="${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}">Click Here</a>
+    </div>
+  </div>
+</body>
+`
       }
-      console.log("option",mailOptions)
+      console.log("option", mailOptions)
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.log("error", error);
