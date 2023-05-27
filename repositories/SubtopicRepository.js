@@ -46,6 +46,7 @@ const getSubtopic = async (query) => {
       },
     },
   }, ]);
+  console.log(query, results);
 
   return results;
 };

@@ -117,7 +117,6 @@ const updateBlog = async ({
   blog.title = title;
   blog.subtopics = subtopics;
   blog.public = status;
-  blog.editor_user_id = editor_user_id;
 
   // console.log(blog);
   const savedBlog = await blog.save();

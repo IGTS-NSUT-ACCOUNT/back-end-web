@@ -41,7 +41,7 @@ const removeBlogId = async (user_id, blog_id) => {
 
 // - getBlogIds()
 const getBlogIds = async (user_id) => {
-  const editor = await getEditorById(user_id);
+  const editor = await getEditorByUserId(user_id);
   return editor.blog_ids;
 };
 

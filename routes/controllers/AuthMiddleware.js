@@ -80,7 +80,7 @@ const isEditorOfTheBlog = async (req, res, next) => {
     // console.log(blog.editor_user_id.equals(req.user._id));
     if (
       req.isAuthenticated() &&
-      (blog.editor_user_id === (req.user._id) || req.user.role === "ADMIN")
+      (blog.editor_user_id.equals(req.user._id) || req.user.role === "ADMIN")
     ) {
       next();
     } else {
