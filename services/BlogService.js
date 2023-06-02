@@ -223,6 +223,15 @@ const generateEditorBlogList = async (blogList) => {
 
       const editorUser = await UserRepository.getUserById(blog.editor_user_id);
       if (!editorUser) return blog;
+      if(editorUser.name.first_name == undefined){
+        return {
+          ...blog,
+          editor: {
+            name: editorUser.name.last_name,
+            pfp_url: editorUser.pfp_url,
+          },
+        };
+      }
       return {
         ...blog,
         editor: {
