@@ -9,9 +9,17 @@ const SubtopicRepository = require("./../repositories/SubtopicRepository");
 const publishBlog = async (editor_user_id, body) => {
   if (body.blog_id) {
     const b = await BlogRepository.getABlogSilent(body.blog_id);
-    b.subtopics.forEach(async (subtopic, i) => {
-      await SubtopicRepository.removeBlogId(subtopic.subtopic_id, b._id);
-    });
+    await Promise.all(
+      b.subtopics.map(async (subtopic) => {
+        await SubtopicRepository.removeBlogId(subtopic.subtopic_id, b._id);
+      })
+    );
+
+    await Promise.all(
+      b.subtopics.map(async (subtopic) => {
+        await SubtopicRepository.DeleteSubtopicIfNull(subtopic.subtopic_id);
+      })
+    );
 
     const blog = await BlogRepository.updateBlog({
       blog_id: body.blog_id,

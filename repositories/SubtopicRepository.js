@@ -61,6 +61,11 @@ const deleteBlog = async (subtopic_id, blog_id) => {
   subtopic.blog_ids = subtopic.blog_ids.filter((el) => !el.equals(blog_id));
 }
 
+const DeleteSubtopicIfNull = async(subtopic_id)=>{
+  const subtopic = await getSubtopicById(subtopic_id);
+  if(subtopic.blog_ids.length === 0)await Subtopic.findByIdAndDelete(subtopic_id);
+}
+
 module.exports = {
   addNewSubtopic,
   addBlogId,
@@ -69,5 +74,6 @@ module.exports = {
   getSubtopic,
   getSubtopicById,
   getAllSubtopics,
-  deleteBlog
+  deleteBlog,
+  DeleteSubtopicIfNull
 };
