@@ -71,11 +71,18 @@ const deleteBlog = async (editor_user_id, role, blog_id) => {
     await AdminRepository.deleteBlog(editor_user_id, blog_id);
   }
 
-  const blog = await BlogRepository.getABlogSilent(blog_id);
-  // delte blog from its subtopic
-  blog.subtopics.forEach(async (el) => {
-    await SubtopicRepository.deleteBlog(el.subtopic_id, blog_id);
-  });
+  const b = await BlogRepository.getABlogSilent(blog_id);
+    await Promise.all(
+      b.subtopics.map(async (subtopic) => {
+        await SubtopicRepository.removeBlogId(subtopic.subtopic_id, b._id);
+      })
+    );
+
+    await Promise.all(
+      b.subtopics.map(async (subtopic) => {
+        await SubtopicRepository.DeleteSubtopicIfNull(subtopic.subtopic_id);
+      })
+    );
 
   await BlogRepository.deleteBlog(blog_id);
 };
