@@ -153,6 +153,7 @@ const saveBlog = async (editor_user_id, body) => {
 const getEditorCard = async (editor_user_id) => {
   const user = await UserRepository.getUserById(editor_user_id);
   let blogs = [];
+  if(user){
   if (user.role === "ADMIN")
     blogs = (await AdminRepository.getAdminByUserId(editor_user_id)).blog_ids;
   if (user.role === "EDITOR")
@@ -164,6 +165,14 @@ const getEditorCard = async (editor_user_id) => {
     pfp_url,
     blogs,
   };
+}
+else{
+  return{
+    name:"Deleted User",
+    pfp_url:"https://media.gettyimages.com/id/1389019209/vector/ghost-doodle-5.jpg?s=612x612&w=gi&k=20&c=rIEN506sx3wa05ezS4BEGmbXwrU1gQJYSDv_NdjeEjg=",
+    blogs:[]
+  }
+}
 };
 
 const getAllBlogs = async (editor_user_id) => {

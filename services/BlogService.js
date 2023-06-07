@@ -14,10 +14,17 @@ const getAblog = async (blog_id, user_id) => {
   const blog = await BlogRepository.getABlog(blog_id);
 
   const editorUser = await UserRepository.getUserById(blog.editor_user_id);
+  if(editorUser){
   blog.editor = {
     name: editorUser.name.first_name + " " + editorUser.name.last_name,
     pfp_url: editorUser.pfp_url,
   };
+}else{
+  blog.editor = {
+    name: "Deleted User",
+    pfp_url: "https://media.gettyimages.com/id/1389019209/vector/ghost-doodle-5.jpg?s=612x612&w=gi&k=20&c=rIEN506sx3wa05ezS4BEGmbXwrU1gQJYSDv_NdjeEjg=",
+  };
+}
 
   const liked = user_id ? (blog.liked_by.get(user_id) ? true : false) : false;
   return { blog, liked };
@@ -222,7 +229,15 @@ const generateEditorBlogList = async (blogList) => {
     blogList.map(async (blog) => {
 
       const editorUser = await UserRepository.getUserById(blog.editor_user_id);
-      if (!editorUser) return blog;
+      if (!editorUser) {
+        return {
+          ...blog,
+          editor:{
+            name:"Deleted User",
+            pfp_url:"https://media.gettyimages.com/id/1389019209/vector/ghost-doodle-5.jpg?s=612x612&w=gi&k=20&c=rIEN506sx3wa05ezS4BEGmbXwrU1gQJYSDv_NdjeEjg="
+          }
+        }
+      };
       if(editorUser.name.first_name == undefined){
         return {
           ...blog,
