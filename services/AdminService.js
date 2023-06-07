@@ -7,18 +7,47 @@ const BlogRepository = require("./../repositories/BlogRepository");
 const manageUserRole = async (user_id, newRole) => {
   const user = await UserRepository.getUserById(user_id);
 
-  if (user.role === "ADMIN") {
-    await AdminRepository.deleteAdmin(user_id);
-  } else if (user.role === "EDITOR") {
-    await EditorRepository.deleteEditor(user_id);
+  if (user.role === "ADMIN" && newRole === "EDITOR"){
+      const adminUser = await AdminRepository.getAdminByUserId(user_id);
+      const newEditor = await EditorRepository.registerEditor(user_id);
+      adminUser.blog_ids.map((el)=>{
+        EditorRepository.addBlogId(user_id,el);
+      })
+      await AdminRepository.deleteAdmin(user_id);
+  } else if (user.role === "EDITOR" && newRole === "ADMIN"){
+      const editorUser = await EditorRepository.getEditorByUserId(user_id);
+      const newAdmin = await AdminRepository.registerAdmin(user_id);
+      editorUser.blog_ids.map((el)=>{
+        AdminRepository.addBlogId(user_id,el);
+      })
+      await EditorRepository.deleteEditor(user_id);
   }
-
-  const updatedUser = await UserRepository.updatedUserRole(user_id, newRole);
-  if (newRole === "EDITOR") {
+  else if (newRole === "EDITOR" && user.role === "REGULAR") {
+    const editorUser = await EditorRepository.getEditorByUserId(user_id);
+    if(!editorUser){
+    const adminUser = await AdminRepository.getAdminByUserId(user_id);
     await EditorRepository.registerEditor(user_id);
-  } else if (newRole === "ADMIN") {
-    await AdminRepository.registerAdmin(user_id);
+    if(adminUser){
+      adminUser.blog_ids.map((el)=>{
+        EditorRepository.addBlogId(user_id,el);
+      })
+      await AdminRepository.deleteAdmin(user_id);
+    }
   }
+  } else if (newRole === "ADMIN" && user.role === "REGULAR") {
+    const adminUser = await AdminRepository.getAdminByUserId(user_id);
+    if(!adminUser){
+    const editorUser = await EditorRepository.getEditorByUserId(user_id);
+    await AdminRepository.registerAdmin(user_id);
+    if(editorUser){
+      editorUser.blog_ids.map((el)=>{
+        AdminRepository.addBlogId(user_id,el);
+      })
+      await EditorRepository.deleteEditor(user_id);
+    }
+  }
+}
+  const updatedUser = await UserRepository.updatedUserRole(user_id, newRole);
 
   return updatedUser;
 };
