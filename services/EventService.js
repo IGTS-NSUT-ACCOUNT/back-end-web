@@ -158,45 +158,53 @@ const createAnEvent = async (user_id, event_info) => {
 const updateEventInfo = async (event_id, user_id, event_info) => {
 
     const event = await EventRepository.getEventById(event_id);
-
     event_info.event_moderators = await Promise.all(event_info.event_moderators.map(async(el)=>{
         const user = await UserRepository.getUserByEmail(el);
         return user._id;
     }));
 
-    console.log(event_info.event_moderators)
     // delete removed tickets
 
-    if (!event.event_moderators)
-        event.event_moderators = [];
+    if (event.event_moderators.length == 0){
+        event.event_moderators.splice(0, event.event_moderators.length);}
+        
+        if (event_info.event_moderators.length == 0){
+        event_info.event_moderators.splice(0, event_info.event_moderators.length);}
 
-    if (!event_info.event_moderators)
-        event_info.event_moderators = [];
-
-    const toBeDeletedTickets = event.event_moderators.filter((el, i) => event_info.event_moderators.includes(el.toString()));
-
+    const toBeDeletedTickets = event.event_moderators.filter((el, i) => !event_info.event_moderators.includes(el));
     toBeDeletedTickets.forEach(async (el) => {
         await ModeratorTicket.findOneAndDelete({
             event_id: event_id,
             user_id: el
         });
     })
-    const deletedRemoved = event.event_moderators.filter((el, i) => !event_info.event_moderators.includes(el.toString()));
+    const deletedRemoved = event.event_moderators.filter((el, i) => event_info.event_moderators.includes(el));
     event.event_moderators = deletedRemoved;
     await event.save();
-
+    
     // add the new tickets
 
-    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(new mongoose.mongo.ObjectId(el)))
+    const ticketsToBeAdded = event_info.event_moderators.filter((el, i) => !event.event_moderators.includes(el));
     var user_ids = [];
-    ticketsToBeAdded.map(async (element) => {
-        const user = await UserService.getUser(new mongoose.mongo.ObjectId(element));
-        console.log(user);
-        if (user.society_member)
-            user_ids.push(user._id);
-    });
-    event.event_moderators += user_ids;
+    await Promise.all(ticketsToBeAdded.map(async (element) => {
+        const user = await UserService.getUser(element);
+        if (user.society_member) {
+          user_ids.push(user._id);
+        }
+      }));
+      user_ids.map((el)=>event.event_moderators.push(el));
+    // event.event_moderators += user_ids;
     await event.save();
+
+    const savedEvent = await EventRepository.updateEventInfo(event_id, user_id, {
+        event_title: event_info.event_title,
+        date_time: event_info.date_time,
+        main_poster: event_info.main_poster,
+        details: event_info.details,
+        event_photos: event_info.event_photos,
+        event_moderators: event.event_moderators,
+        location: event_info.location,
+    });
 
     // tickets
     user_ids.forEach(async (el) => {
@@ -246,15 +254,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
 
 
 
-    const savedEvent = await EventRepository.updateEventInfo(event_id, user_id, {
-        event_title: event_info.event_title,
-        date_time: event_info.date_time,
-        main_poster: event_info.main_poster,
-        details: event_info.details,
-        event_photos: event_info.event_photos,
-        event_moderators: event.event_moderators,
-        location: event_info.location,
-    });
+    
 
     // event_title,
     // date_time,
@@ -355,7 +355,7 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
                 to: userfind.email,
                 subject: "Sending Participation Ticket For Event",
 
-                text: `Link to access list of Event Moderators: ${SERVER_URL}/events/${savedEvent._id}`,
+                text: `Link to access list of Event : ${SERVER_URL}/events/${savedEvent._id}`,
                 html: html
             }
 
