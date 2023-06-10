@@ -15,7 +15,8 @@ const SERVER_URL = process.env.FRONT_END_URL;
 const keysecret = process.env.JWT_SECRET;
 const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
-const EmailHTML = require("./EmailHTML")
+const ParticipantEmailHTML = require("./ParticipantEmailHTML")
+const ModeratorEmailHTML = require("./ModeratorEmailHTML")
 
 // const EmailTemplate = require("./beefree-4aqd7j91k52")
 
@@ -215,10 +216,17 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
         const savedTicket = await newTicket.save();
 
         // email them the ticket
+        const participants_link = `${SERVER_URL}/event/${savedEvent._id}/viewmembers`;
+    const edit_link = `${SERVER_URL}/event-creation/${savedEvent._id}`;
+
+        
         try {
             const userfind = await UserService.getUser(el);
             // console.log(userfind)
             //token generate for reset password
+
+        const html = await ModeratorEmailHTML.createHTML(savedEvent.main_poster,savedEvent.event_title,participants_link, edit_link, userfind.name.first_name, userfind.name.last_name);
+
             const token = jwt.sign({
                 _id: userfind._id
             }, keysecret, {
@@ -237,6 +245,7 @@ const updateEventInfo = async (event_id, user_id, event_info) => {
                     from: sender_email,
                     to: userfind.email,
                     subject: "Sending Moderation Ticket For Event",
+                html: html,
                     text: `
                 Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
                 Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
@@ -344,7 +353,7 @@ const registerForEvent = async (user_id, event_id, registeration_info) => {
         var month = event.date_time.getMonth();
         var year = event.date_time.getFullYear()
         newDate = day + "/" + month + "/" + year
-        const html = await EmailHTML.createHTML(event.main_poster, newDate, edit_link, newUser.name.first_name, newUser.name.last_name);
+        const html = await ParticipantEmailHTML.createHTML(event.main_poster, newDate, edit_link, newUser.name.first_name, newUser.name.last_name);
 
 
 

@@ -14,6 +14,10 @@ const app = express();
 
 connectDB();
 
+//for meta helmet
+app.use(require('prerender-node').set('prerenderToken', '4f4YkHFvjA6Ef2FQCYPd'));
+
+
 app.use(express.json({
   limit: "50mb"
 }));
