@@ -89,7 +89,7 @@ const updateEventInfo = async (event_id, user_id, {
     event.main_poster=poster_url_parsed;
     event.details=details;
     event.event_moderators=event_moderators;
-    events.location=location;
+    event.location=location;
     event.created_by= user_id;
 
     console.log(event);
