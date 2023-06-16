@@ -94,6 +94,7 @@ const generateResultFromBlogIds = async (blog_ids) => {
 
       if (blog.public)
         return {
+          createdAt : blog.createdAt,
           title: blog.title,
           content: blog.content,
           thumbnail: blog.thumbnail,
