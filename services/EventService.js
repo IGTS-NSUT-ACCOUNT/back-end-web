@@ -5,11 +5,11 @@ const ModeratorTicket = require('../models/event/ModeratorTicket');
 const EventRepository = require('./../repositories/EventRepository')
 const UserService = require('./../services/UserService');
 const ParticipationTicket = require('../models/event/ParticipationTicket');
-const jwt = require("jsonwebtoken");
 const User = require("../models/user/User");
-const nodemailer = require("nodemailer");
 const QRCode = require('qrcode');
 const fs = require('fs');
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const UserRepository = require('./../repositories/UserRepository');
 const SERVER_URL = process.env.FRONT_END_URL;
 const keysecret = process.env.JWT_SECRET;
@@ -118,6 +118,11 @@ const createAnEvent = async (user_id, event_info) => {
             const userfind = await UserService.getUser(el);
             // console.log(userfind)
             //token generate for reset password
+            const participants_link = `${SERVER_URL}/event/${savedEvent._id}/viewmembers`;
+            const edit_link = `${SERVER_URL}/event-creation/${savedEvent._id}`;
+        
+            const html = await ModeratorEmailHTML.createHTML(savedEvent.main_poster,savedEvent.event_title,participants_link, edit_link, userfind.name.first_name, userfind.name.last_name);
+
             const token = jwt.sign({
                 _id: userfind._id
             }, keysecret, {
@@ -136,13 +141,13 @@ const createAnEvent = async (user_id, event_info) => {
                     from: sender_email,
                     to: userfind.email,
                     subject: "Sending Moderation Ticket For Event",
+                html: html,
                     text: `
-                    Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
-                    Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
+                Link to access list of Event Moderators: ${SERVER_URL}/event/${savedEvent._id}/viewmembers
+                Link to accedd/edit Event Details: ${SERVER_URL}/event-creation/${savedEvent._id}`
                 }
 
-                console.log(mailOptions);
-                sendEmail(mailOptions);
+                sendEmail(mailOptions)
             }
         } catch (error) {
             // res.status(401).json({status:401,message:"Invalid User"})

@@ -27,7 +27,7 @@ const {
 const User = require("../../models/user/User");
 const SERVER_URL = process.env.FRONT_END_URL;
 
-
+const ForgotPasswordEmailHTML = require("../../services/ForgotPasswordEmailHTML");
 
 const {
   google
@@ -381,7 +381,6 @@ router.post("/sendpasswordlink", async (req, res) => {
 
   try {
     const userfind = await UserService.getUserByEmail(email.email);
-
     //token generate for reset password
     const token = jwt.sign({
       _id: userfind._id
@@ -389,7 +388,7 @@ router.post("/sendpasswordlink", async (req, res) => {
       expiresIn: "900s"
     });
     console.log("token", token)
-
+    
     const setusertoken = await User.findByIdAndUpdate({
       _id: userfind._id
     }, {
@@ -397,6 +396,8 @@ router.post("/sendpasswordlink", async (req, res) => {
     }, {
       new: true
     });
+    const link = `${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}`;
+    const html = await ForgotPasswordEmailHTML.createHTML(link);
     console.log("id", userfind._id)
     console.log("usertoken", setusertoken)
     if (setusertoken) {
@@ -404,30 +405,7 @@ router.post("/sendpasswordlink", async (req, res) => {
         from: sender_email,
         to: setusertoken.email,
         subject: "Reset Password",
-        html: `
-    <body style="background-color: #222; color: #fff; font-family: Arial, sans-serif;">
-      <div style="max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
-        <img src="https://res.cloudinary.com/dafqvvk91/image/upload/v1685046439/igts-white-logo_u3osk8.png" alt="Company Logo" style="width: 150px;">
-        <h1 style="font-size: 24px; margin: 20px 0;">The Indian Game Theory Society</h1>
-      </div>
-      <hr style="border: 0; border-top: 1px solid #fff;">
-      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <p style="font-size: 16px; margin-bottom: 20px;">
-          <strong>Caution: </strong>Please be aware that this link is valid for 15 minutes only. Make sure to reset your password within this time frame.
-        </p>
-        <div style="text-align: center;">
-          <a href="${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}" style="display: inline-block; background-color: #007bff; color: #fff; padding: 12px 24px; text-decoration: none; border-radius: 4px; font-weight: bold; transition: background-color 0.3s ease;">
-            Reset Password
-          </a>
-        </div>
-      </div>
-      <div style="max-width: 600px; margin: 0 auto; padding: 20px; text-align: center;">
-        <p style="font-size: 14px;">
-          This email was sent by The Indian Game Theory Society. If you didn't request a password reset, please ignore this email.
-        </p>
-      </div>
-    </body>
-  `
+        html: html
       };
 
       console.log("option", mailOptions)

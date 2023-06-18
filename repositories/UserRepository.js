@@ -4,6 +4,11 @@ const getUserById = async (user_id) => {
   const user = await User.findById(user_id);
   return user;
 };
+//getAllUsers()
+const getAllUsers = async()=>{
+  const users = await User.find()
+  return users;
+}
 
 //   getUserByEmail() -
 const getUserByEmail = async (email_id) => {
@@ -136,4 +141,5 @@ module.exports = {
   deleteUser,
   registerUserForEvent,
   unregisterUserForEvent,
+  getAllUsers,
 };

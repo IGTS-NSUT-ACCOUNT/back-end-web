@@ -13,9 +13,14 @@ const {
 // User Service
 // - getUser()
 const getUser = async (user_id) => {
-  console.log('h');
   return await UserRepository.getUserById(user_id);
 };
+
+// getAllUsers()
+const getAllUsers = async()=>{
+  return await UserRepository.getAllUsers();
+}
+
 const getUserByEmail = async (email) => {
   return await UserRepository.getUserByEmail(email);
 };
@@ -171,5 +176,6 @@ module.exports = {
   editUserPass,
   resetUserPass,
   deleteUser,
-  registerUserForEvent
+  registerUserForEvent,
+  getAllUsers
 };

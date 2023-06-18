@@ -1,10 +1,61 @@
 const EditorRepository = require("./../repositories/EditorRepository");
+const DOMPurify = require("dompurify");
 const BlogRepository = require("./../repositories/BlogRepository");
 const UserRepository = require("./../repositories/UserRepository");
 const AdminRepository = require("./../repositories/AdminRepository");
 const SubtopicRepository = require("./../repositories/SubtopicRepository");
-
+const NewArticleEmailHTML = require("./NewArticleEmailHTML");
+const UserService = require("./UserService")
+const SERVER_URL = process.env.FRONT_END_URL;
+const keysecret = process.env.JWT_SECRET;
+const sender_email = process.env.SENDER_EMAIL;
+const sender_email_pass = process.env.SENDER_EMAIL_PASS;
+const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+const User = require("./../models/user/User")
+const { title } = require("process");
 // Editor Service
+
+
+function sendEmail(mailOptions) {
+  return new Promise((resolve, reject) => {
+      var transporter = nodemailer.createTransport({
+          service: "gmail",
+          auth: {
+              user: sender_email,
+              pass: sender_email_pass
+          }
+      })
+
+      transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+              console.log("error", error);
+              return reject({
+                  message: `An error has occured`
+              })
+              //   res.status(401).json({status:401,message:"Email not sent"})
+          } else {
+              console.log("Email sent", info.response);
+              //   res.status(201).json({status:201,message:"Email sent successfully"});
+              return resolve({
+                  message: `Email Sent Successfully`
+              })
+          }
+      })
+  })
+}
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+      user: sender_email,
+      pass: sender_email_pass
+  }
+})
+
+
+
+
 // - publishBlog()
 const publishBlog = async (editor_user_id, body) => {
   if (body.blog_id) {
@@ -31,7 +82,6 @@ const publishBlog = async (editor_user_id, body) => {
       subtopics: body.subtopics,
     });
 
-
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
     });
@@ -56,6 +106,50 @@ const publishBlog = async (editor_user_id, body) => {
     blog.subtopics.forEach(async (subtopic, i) => {
       await SubtopicRepository.addBlogId(subtopic.subtopic_id, blog._id);
     });
+
+        //Email new article to all users
+
+
+      try {
+        // console.log(userfind)
+        //token generate for reset password
+        const editor = await UserService.getUser(editor_user_id);
+        const thumbnail_URL=blog.thumbnail;
+        const title=blog.title;
+        const brief= blog.content.slice(0, 200) + "...";
+        const postTitle = blog.title.replaceAll(' ', '-');
+        const article_link=`${SERVER_URL}/blogs/${blog._id}/${postTitle}`;
+        const editor_fname=editor.name.first_name;
+        const editor_lname=editor.name.last_name;
+        const html = await NewArticleEmailHTML.createHTML(thumbnail_URL,title,brief, article_link,editor_fname,editor_lname);
+        // const allUsers = await UserService.getAllUsers();
+        //   await Promise.all(
+        //     allUsers.map(async (el) => {
+        //       const userfind = await UserService.getUser(el);
+        //       const token = jwt.sign({ _id: userfind._id }, keysecret, { expiresIn: "600d" });
+      
+        //       const setusertoken = await User.findByIdAndUpdate(
+        //         { _id: userfind._id },
+        //         { verifytoken: token },
+        //         { new: true }
+        //       );
+      
+        //       if (setusertoken) {
+        //         const mailOptions = {
+        //           from: sender_email,
+        //           to: userfind.email,
+        //           subject: "We have got a new article for you.",
+        //           html: html,
+        //         };
+      
+        //         await sendEmail(mailOptions);
+        //       }
+        //     })
+        //   );
+    } catch (error) {
+        // res.status(401).json({status:401,message:"Invalid User"})
+        console.log(error);
+    }
 
     return blog;
   }
