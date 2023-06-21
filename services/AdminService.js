@@ -69,9 +69,15 @@ const getAllBlogs = async () => {
   const blogs = await BlogRepository.getAllBlogs();
   return blogs;
 };
+
+const getAllAdmins=async()=>{
+  return await AdminRepository.getAllAdmins();
+}
+
 module.exports = {
   manageUserRole,
   manageUserSoc,
   searchBlogs,
   getAllBlogs,
+  getAllAdmins
 };

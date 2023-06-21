@@ -48,6 +48,11 @@ const deleteBlog = async (user_id, blog_id) => {
   await admin.save();
 }
 
+const getAllAdmins= async()=>{
+  const admins = await Admin.find()
+  return admins;
+}
+
 module.exports = {
   registerAdmin,
   getAdminById,
@@ -55,5 +60,6 @@ module.exports = {
   deleteAdmin,
   addBlogId,
   getBlogIds,
-  deleteBlog
+  deleteBlog,
+  getAllAdmins
 };
