@@ -15,8 +15,8 @@ const SERVER_URL = process.env.FRONT_END_URL;
 const keysecret = process.env.JWT_SECRET;
 const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
-const ParticipantEmailHTML = require("./ParticipantEmailHTML")
-const ModeratorEmailHTML = require("./ModeratorEmailHTML")
+const ParticipantEmailHTML = require("../EmailTemplates/ParticipantEmailHTML")
+const ModeratorEmailHTML = require("../EmailTemplates/ModeratorEmailHTML")
 
 // const EmailTemplate = require("./beefree-4aqd7j91k52")
 

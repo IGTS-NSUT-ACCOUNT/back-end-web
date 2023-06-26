@@ -27,7 +27,7 @@ const {
 const User = require("../../models/user/User");
 const SERVER_URL = process.env.FRONT_END_URL;
 
-const ForgotPasswordEmailHTML = require("../../services/ForgotPasswordEmailHTML");
+const ForgotPasswordEmailHTML = require("../../EmailTemplates/ForgotPasswordEmailHTML");
 
 const {
   google
