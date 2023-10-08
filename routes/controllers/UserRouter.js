@@ -27,6 +27,9 @@ const {
 const User = require("../../models/user/User");
 const SERVER_URL = process.env.FRONT_END_URL;
 
+const randomstring = require("randomstring");
+const bcrypt = require("bcrypt");
+
 const ForgotPasswordEmailHTML = require("../../EmailTemplates/ForgotPasswordEmailHTML");
 
 const {
@@ -48,6 +51,7 @@ function getAuthUrl() {
     prompt: 'consent',
     scope: scopes,
   });
+  // console.log(url);
   return url;
 }
 
@@ -60,7 +64,15 @@ const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
 //email config
 
-
+const generatePassword=(length) =>{
+  var password = "";
+  var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  for (var i = 0; i < length; i++) {
+    var randomIndex = Math.floor(Math.random() * charset.length);
+    password += charset.charAt(randomIndex);
+  }
+  return password;
+}
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -138,50 +150,109 @@ router.post("/login", async (req, res) => {
 });
 
 
-router.get('/login/google', async (req, res) => {
-  const authUrl = getAuthUrl();
-  return res.json({
-    authUrl
+// router.get('/login/google', async (req, res,next) => {
+//   try {
+//     const user = await User.findOne({ email: req.body.email });
+//     const token =issueJWT(user);
+//     // const { password, isAdmin, ...otherDetails } = user._doc;
+//     res
+//       .cookie("access_token", token)
+//       .status(200)
+//       .json({token });
+//   } catch (err) {
+//     next(err);
+//   }
+// })
+
+
+router.post('/register/google', async (req, res,next) => {
+  try {
+
+  const newUser = await User.findOne({
+    email: req.body.email
   });
+  let user;
+  if (!newUser) {
+
+    let name = {
+      first_name: '',
+      last_name: req.body.name
+    };
+
+    if (req.body.name.split(' ').length >= 2) {
+      const displayNameSplit = req.body.name.split(' ');
+      name = {
+        first_name: displayNameSplit.slice(0, -1).join(' '),
+        last_name: displayNameSplit.slice(-1)[0]
+      };
+    }
+
+    user = await UserService.registerUser({
+
+      name,
+      email: req.body.email,
+      password: generatePassword(16),
+      pfp_url: req.body.profile,
+    })
+
+  } else {
+    user = newUser;
+  }
+    const token = issueJWT(newUser);
+    // const { password, isAdmin, ...otherDetails } = newUser._doc;
+    res
+      .cookie("access_token", token)
+      .status(200)
+      .json({token});
+  } catch (err) {
+    next(err);
+  }
 })
+// router.get('/login/google', async (req, res) => {
+//   const authUrl = getAuthUrl();
+//   // console.log(authUrl)
+//   return res.json({
+//     authUrl
+//   });
+// })
 
-router.get('/login/google/callback', passport.authenticate("google", {
-  session: false
-}), async (req, res) => {
+// router.get('/login/google/callback', passport.authenticate("google", {
+//   session: false
+// }), async (req, res) => {
 
-  console.log('here');
-  console.log(req.user);
-  const generatedToken = issueJWT(req.user);
+//   console.log('here');
+//   console.log(req.user);
+//   const generatedToken = issueJWT(req.user);
 
-  const wss = req.app.get("wss"); // Get the WebSocket Server instance from the app
+//   const wss = req.app.get("wss"); // Get the WebSocket Server instance from the app
 
 
 
-  // Emit a WebSocket message with the generatedToken as the payload
-  wss.clients.forEach((client) => {
-    client.send(JSON.stringify(generatedToken));
-  });
+//   // Emit a WebSocket message with the generatedToken as the payload
+//   wss.clients.forEach((client) => {
+//     client.send(JSON.stringify(generatedToken));
+//   });
 
-  res.send(`
-  <!DOCTYPE html>
-  <html>
-    <head>
-      <script>
-        window.onload = function() {
-          window.close();
-        }
-      </script>
-    </head>
-    <body>
-      <h1>Thank you!</h1>
-      <p>The window will close automatically.</p>
-    </body>
-  </html>
-`);
+//   res.send(`
+//   <!DOCTYPE html>
+//   <html>
+//     <head>
+//       <script>
+//         window.onload = function() {
+//           window.close();
+//         }
+//       </script>
+//     </head>
+//     <body>
+//       <h1>Thank you!</h1>
+//       <p>The window will close automatically.</p>
+//     </body>
+//   </html>
+// `);
 
-  res.end();
+//   res.end();
 
-})
+// })
 
 
 router.post("/register", async (req, res) => {
