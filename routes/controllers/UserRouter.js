@@ -1,29 +1,15 @@
-const {
-  default: mongoose
-} = require("mongoose");
+const { default: mongoose } = require("mongoose");
 const UserService = require("../../services/UserService");
-const {
-  isAuth
-} = require("./AuthMiddleware");
-const {
-  validateLoginInput
-} = require("./../../validation/login");
-const {
-  issueJWT
-} = require("../../lib/utils");
+const { isAuth } = require("./AuthMiddleware");
+const { validateLoginInput } = require("./../../validation/login");
+const { issueJWT } = require("../../lib/utils");
 const passport = require("passport");
-const {
-  validateRegisterInput
-} = require("../../validation/register");
+const { validateRegisterInput } = require("../../validation/register");
 const router = require("express").Router();
 const nodemailer = require("nodemailer");
-const {
-  getUserById
-} = require("../../repositories/UserRepository");
+const { getUserById } = require("../../repositories/UserRepository");
 const jwt = require("jsonwebtoken");
-const {
-  data
-} = require("autoprefixer");
+const { data } = require("autoprefixer");
 const User = require("../../models/user/User");
 const SERVER_URL = process.env.FRONT_END_URL;
 
@@ -32,9 +18,7 @@ const bcrypt = require("bcrypt");
 
 const ForgotPasswordEmailHTML = require("../../EmailTemplates/ForgotPasswordEmailHTML");
 
-const {
-  google
-} = require('googleapis');
+const { google } = require("googleapis");
 
 // Create an instance of the OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
@@ -45,18 +29,15 @@ const oauth2Client = new google.auth.OAuth2(
 
 // Function to generate the authorization URL
 function getAuthUrl() {
-  const scopes = ['email', 'profile'];
+  const scopes = ["email", "profile"];
   const url = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
-    prompt: 'consent',
+    access_type: "offline",
+    prompt: "consent",
     scope: scopes,
   });
   // console.log(url);
   return url;
 }
-
-
-
 
 const keysecret = process.env.JWT_SECRET;
 
@@ -64,23 +45,24 @@ const sender_email = process.env.SENDER_EMAIL;
 const sender_email_pass = process.env.SENDER_EMAIL_PASS;
 //email config
 
-const generatePassword=(length) =>{
+const generatePassword = (length) => {
   var password = "";
-  var charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  var charset =
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   for (var i = 0; i < length; i++) {
     var randomIndex = Math.floor(Math.random() * charset.length);
     password += charset.charAt(randomIndex);
   }
   return password;
-}
+};
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
     user: sender_email,
-    pass: sender_email_pass
-  }
-})
+    pass: sender_email_pass,
+  },
+});
 
 // User Controllers /api/user/
 
@@ -88,7 +70,7 @@ const transporter = nodemailer.createTransport({
 router.get(
   "/",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   isAuth,
   async (req, res, next) => {
@@ -97,13 +79,13 @@ router.get(
       const user = await UserService.getUser(user_id);
       return res.json({
         ...user,
-        success: true
+        success: true,
       });
     } catch (error) {
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -113,10 +95,7 @@ router.get(
 
 router.post("/login", async (req, res) => {
   try {
-    const {
-      errors,
-      isValid
-    } = validateLoginInput(req.body);
+    const { errors, isValid } = validateLoginInput(req.body);
 
     if (!isValid) {
       return res.status(400).json(errors);
@@ -126,12 +105,10 @@ router.post("/login", async (req, res) => {
 
     const token = await UserService.loginUser(email, password);
     if (!token) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "Email or password not valid"
-        });
+      return res.status(404).json({
+        success: false,
+        message: "Email or password not valid",
+      });
     } else {
       res.json({
         success: true,
@@ -144,11 +121,10 @@ router.post("/login", async (req, res) => {
     console.log(error);
     res.json({
       message: "Error: " + error,
-      success: false
+      success: false,
     });
   }
 });
-
 
 // router.get('/login/google', async (req, res,next) => {
 //   try {
@@ -164,50 +140,46 @@ router.post("/login", async (req, res) => {
 //   }
 // })
 
-
-router.post('/register/google', async (req, res,next) => {
+router.post("/register/google", async (req, res, next) => {
+  console.log("google backend");
+  console.log(req.body);
   try {
-
-  const newUser = await User.findOne({
-    email: req.body.email
-  });
-  let user;
-  if (!newUser) {
-
-    let name = {
-      first_name: '',
-      last_name: req.body.name
-    };
-
-    if (req.body.name.split(' ').length >= 2) {
-      const displayNameSplit = req.body.name.split(' ');
-      name = {
-        first_name: displayNameSplit.slice(0, -1).join(' '),
-        last_name: displayNameSplit.slice(-1)[0]
-      };
-    }
-
-    user = await UserService.registerUser({
-
-      name,
+    const newUser = await User.findOne({
       email: req.body.email,
-      password: generatePassword(16),
-      pfp_url: req.body.profile,
-    })
+    });
+    let user;
+    if (!newUser) {
+      console.log("new user not found");
+      let name = {
+        first_name: "",
+        last_name: req.body.name,
+      };
 
-  } else {
-    user = newUser;
-  }
-    const token = issueJWT(newUser);
+      if (req.body.name.split(" ").length >= 2) {
+        const displayNameSplit = req.body.name.split(" ");
+        name = {
+          first_name: displayNameSplit.slice(0, -1).join(" "),
+          last_name: displayNameSplit.slice(-1)[0],
+        };
+      }
+
+      user = await UserService.registerUser({
+        name,
+        email: req.body.email,
+        password: generatePassword(16),
+        pfp_url: req.body.profile,
+      });
+    } else {
+      user = newUser;
+    }
+    const token = issueJWT(user);
     // const { password, isAdmin, ...otherDetails } = newUser._doc;
-    res
-      .cookie("access_token", token)
-      .status(200)
-      .json({token});
+    res.cookie("access_token", token).status(200).json({ token });
   } catch (err) {
+    console.error("Error in /register/google:", err); // Log any errors
     next(err);
   }
-})
+});
 // router.get('/login/google', async (req, res) => {
 //   const authUrl = getAuthUrl();
 //   // console.log(authUrl)
@@ -225,8 +197,6 @@ router.post('/register/google', async (req, res,next) => {
 //   const generatedToken = issueJWT(req.user);
 
 //   const wss = req.app.get("wss"); // Get the WebSocket Server instance from the app
-
-
 
 //   // Emit a WebSocket message with the generatedToken as the payload
 //   wss.clients.forEach((client) => {
@@ -254,15 +224,11 @@ router.post('/register/google', async (req, res,next) => {
 
 // })
 
-
 router.post("/register", async (req, res) => {
   try {
     // Form validation
 
-    const {
-      errors,
-      isValid
-    } = validateRegisterInput(req.body);
+    const { errors, isValid } = validateRegisterInput(req.body);
     // Check validation
     if (!isValid) {
       return res.status(400).json(errors);
@@ -278,14 +244,14 @@ router.post("/register", async (req, res) => {
     } else {
       res.json({
         success: false,
-        message: "Failed To Create"
+        message: "Failed To Create",
       });
     }
   } catch (error) {
     console.log(error);
     res.json({
       message: `Error: ${error}`,
-      success: false
+      success: false,
     });
   }
 });
@@ -294,7 +260,7 @@ router.post("/register", async (req, res) => {
 router.get(
   "/logout",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   async (req, res, next) => {
     try {
@@ -304,14 +270,14 @@ router.get(
           return next(err);
         }
         return res.json({
-          success: true
+          success: true,
         });
       });
     } catch (error) {
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -321,7 +287,7 @@ router.get(
 router.put(
   "/editprofile",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   isAuth,
   async (req, res, next) => {
@@ -330,13 +296,13 @@ router.put(
       const updatedUser = await UserService.editUserProfile(user_id, req.body);
       res.json({
         ...updatedUser,
-        success: true
+        success: true,
       });
     } catch (error) {
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -346,7 +312,7 @@ router.put(
 router.post(
   "/editpassword",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   isAuth,
   async (req, res, next) => {
@@ -375,7 +341,7 @@ router.post(
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -385,7 +351,7 @@ router.post(
 router.put(
   "/editprofilepic",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   isAuth,
   async (req, res, next) => {
@@ -401,13 +367,13 @@ router.put(
 
       res.json({
         pfp_url: updatedUser.pfp_url,
-        success: true
+        success: true,
       });
     } catch (error) {
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -416,7 +382,7 @@ router.put(
 router.post(
   "/delete",
   passport.authenticate("jwt", {
-    session: false
+    session: false,
   }),
   async (req, res, next) => {
     try {
@@ -424,13 +390,13 @@ router.post(
       await UserService.deleteUser(user_id);
       res.json({
         message: `Account deleted Successfully`,
-        success: false
+        success: false,
       });
     } catch (error) {
       console.log(error);
       res.json({
         message: `Error ${error}`,
-        success: false
+        success: false,
       });
     }
   }
@@ -446,152 +412,137 @@ router.post("/sendpasswordlink", async (req, res) => {
     res.status(401).json({
       status: 401,
       success: false,
-      message: "Enter your email"
-    })
+      message: "Enter your email",
+    });
   }
 
   try {
     const userfind = await UserService.getUserByEmail(email.email);
     //token generate for reset password
-    const token = jwt.sign({
-      _id: userfind._id
-    }, keysecret, {
-      expiresIn: "900s"
-    });
-    console.log("token", token)
-    
-    const setusertoken = await User.findByIdAndUpdate({
-      _id: userfind._id
-    }, {
-      verifytoken: token
-    }, {
-      new: true
-    });
+    const token = jwt.sign(
+      {
+        _id: userfind._id,
+      },
+      keysecret,
+      {
+        expiresIn: "900s",
+      }
+    );
+    console.log("token", token);
+
+    const setusertoken = await User.findByIdAndUpdate(
+      {
+        _id: userfind._id,
+      },
+      {
+        verifytoken: token,
+      },
+      {
+        new: true,
+      }
+    );
     const link = `${SERVER_URL}/forgotpassword/${userfind._id}/${setusertoken.verifytoken}`;
     const html = await ForgotPasswordEmailHTML.createHTML(link);
-    console.log("id", userfind._id)
-    console.log("usertoken", setusertoken)
+    console.log("id", userfind._id);
+    console.log("usertoken", setusertoken);
     if (setusertoken) {
       const mailOptions = {
         from: sender_email,
         to: setusertoken.email,
         subject: "Reset Password",
-        html: html
+        html: html,
       };
 
-      console.log("option", mailOptions)
+      console.log("option", mailOptions);
       transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
           console.log("error", error);
           res.status(401).json({
             status: 401,
-            message: "Email not sent"
-          })
+            message: "Email not sent",
+          });
         } else {
           console.log("Email sent", info.response);
           res.status(201).json({
             status: 201,
-            message: "Email sent successfully"
+            message: "Email sent successfully",
           });
         }
-      })
+      });
     }
   } catch (error) {
     res.status(401).json({
       status: 401,
-      message: "Invalid User"
-    })
+      message: "Invalid User",
+    });
   }
-})
-
+});
 
 //verify user for forgot password time
 
-router.get('/forgotpassword/:id/:token', async (req, res) => {
-  const {
-    id,
-    token
-  } = req.params;
+router.get("/forgotpassword/:id/:token", async (req, res) => {
+  const { id, token } = req.params;
 
   try {
     const validuser = await User.findOne({
       _id: id,
-      verifytoken: token
+      verifytoken: token,
     });
 
     const verifytoken = jwt.verify(token, keysecret);
 
-
     if (validuser && verifytoken._id) {
       res.status(201).json({
         status: 201,
-        validuser
+        validuser,
       });
     } else {
       res.status(401).json({
         status: 401,
-        message: "User does not exist"
+        message: "User does not exist",
       });
-
     }
-
   } catch (error) {
     res.status(401).json({
       status: 401,
-      error
+      error,
     });
-
   }
-
 });
 
-
 //change password
-router.post('/changepassword/:id/:token', async (req, res) => {
-  const {
-    id,
-    token
-  } = req.params;
+router.post("/changepassword/:id/:token", async (req, res) => {
+  const { id, token } = req.params;
   const password = req.body.password;
 
   try {
     const validuser = await User.findOne({
       _id: id,
-      verifytoken: token
+      verifytoken: token,
     });
     const verifytoken = jwt.verify(token, keysecret);
 
-
     if (validuser && verifytoken._id) {
-
-      const response = await UserService.resetUserPass(
-        id,
-        password
-      );
+      const response = await UserService.resetUserPass(id, password);
 
       if (response) {
         res.status(201).json({
           status: 201,
-          message: "Password Updated Successfully"
+          message: "Password Updated Successfully",
         });
       }
     } else {
       res.status(404).json({
         status: 401,
-        message: "User does not exist"
+        message: "User does not exist",
       });
-
     }
-
   } catch (error) {
     res.status(401).json({
       status: 401,
-      message: error
+      message: error,
     });
-
   }
-
-})
-
+});
 
 module.exports = router;
