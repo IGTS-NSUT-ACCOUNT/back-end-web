@@ -53,7 +53,6 @@ const getBlogsBySubTopic = async (pge_no, subtopic_id) => {
   const blogs = await SubtopicRepository.getAllBlogs(subtopic_id);
   const result = blogs.slice(pge_no * limit, pge_no * limit + limit);
   const finalResult = await generateResultFromBlogIds(result);
-
   const expandedArtists = await generateEditorBlogList(finalResult);
   const trimmedContent = trimContent(expandedArtists);
   return trimmedContent;
@@ -88,9 +87,10 @@ const getBlogsByArtist = async (editor_user_id, pge_no) => {
 };
 
 const generateResultFromBlogIds = async (blog_ids) => {
-  const result = await Promise.all(
+  let result = await Promise.all(
     blog_ids.map(async (el, i) => {
       var blog = await BlogRepository.getABlogSilent(el);
+
 
       if (blog.public)
         return {
@@ -104,7 +104,7 @@ const generateResultFromBlogIds = async (blog_ids) => {
         };
     })
   );
-
+    result =result.filter((el) => el != undefined);
   return result;
 };
 
@@ -228,7 +228,6 @@ const getSimilarBlogs = async (blog_id) => {
 const generateEditorBlogList = async (blogList) => {
   const blogB = await Promise.all(
     blogList.map(async (blog) => {
-
       const editorUser = await UserRepository.getUserById(blog.editor_user_id);
       if (!editorUser) {
         return {
