@@ -3,7 +3,7 @@ require("dotenv").config();
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(
-      `mongodb+srv://igtsnsit:YNeWM37hJSuVyeG5@cluster0.05efdbm.mongodb.net/?retryWrites=true&w=majority`
+      `mongodb+srv://igtsnsit:${process.env.DB_PASS}@cluster0.05efdbm.mongodb.net/?retryWrites=true&w=majority`
     );
     console.log("Connection Successful");
   } catch (error) {
