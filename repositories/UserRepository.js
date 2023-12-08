@@ -1,3 +1,5 @@
+const { read } = require("fs");
+const Blog = require("../models/blog/Blog");
 const User = require("./../models/user/User");
 
 const getUserById = async (user_id) => {
@@ -77,8 +79,9 @@ const getReadingList = async (user_id) => {
 //   addBlogIdToReadingList() -
 const addBlogIdToReadingList = async (user_id, blog_id) => {
   const user = await getUserById(user_id);
-
-  if (!user.readingList.get(blog_id)) {
+  //check if readingList has a blog_id in it and if not then push it
+  if(!user.readingList.find((el)=>el.equals(blog_id)))
+  {
     user.readingList.push(blog_id);
   }
 
@@ -90,7 +93,7 @@ const addBlogIdToReadingList = async (user_id, blog_id) => {
 const removeBlogFromReadingList = async (user_id, blog_id) => {
   const user = await getUserById(user_id);
 
-  if (!user.readingList.get(blog_id)) {
+  if (user.readingList.find((el)=>el.equals(blog_id))) {
     user.readingList = user.readingList.filter((el) => !blog_id.equals(el));
   }
 
@@ -137,7 +140,12 @@ const unregisterUserForEvent = async (user_id, event_id) => {
 const getList = async (user_id) => {
   const user = await getUserById(user_id);
   const readingList = user.readingList;
-  return readingList;
+  //get blogs for each blog_id in readingList
+  const finalreadingList = await Promise.all(readingList.map(async (el) => {
+    const blog = await Blog.findById(el);
+    return blog;
+  }));
+  return finalreadingList;
 };
 
 

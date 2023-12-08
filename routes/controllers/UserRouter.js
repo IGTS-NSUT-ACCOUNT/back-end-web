@@ -19,6 +19,7 @@ const bcrypt = require("bcrypt");
 const ForgotPasswordEmailHTML = require("../../EmailTemplates/ForgotPasswordEmailHTML");
 
 const { google } = require("googleapis");
+const { readFile } = require("fs");
 
 // Create an instance of the OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
@@ -546,16 +547,49 @@ router.post("/changepassword/:id/:token", async (req, res) => {
 });
 
 router.post(
-  "/:blogId/removelist",
+  "/:blogId/deleteblogfromlist",
   passport.authenticate("jwt", {
     session: false,
   }),
   isAuth,
   async (req, res, next) => {
     try {
+      console.log(req.params.blogId)
       const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      console.log("blogId",blogId)
       const user_id = req.user._id;
+      console.log("user_id",user_id)
       const user = await UserService.removeBlogFromReadingLIst(blogId,user_id);
+      return res.json({
+        ...user,
+        success: true,
+      });
+    } catch (error) {
+      console.log("there is an error")
+      console.log(error);
+      res.json({
+        message: `Error ${error}`,
+        success: false,
+      });
+    }
+  }
+);
+
+router.post(
+  "/:blogId/addblogtolist",
+  passport.authenticate("jwt", {
+    session: false,
+  }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      console.log(req.params.blogId)
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      console.log("blogId",blogId)
+      const user_id = req.user._id;
+      console.log("user_id",user_id)
+      const user = await UserService.addBlogToReadingList(blogId,user_id);
+      console.log("user",user)
       return res.json({
         ...user,
         success: true,
@@ -571,15 +605,11 @@ router.post(
 );
 
 router.post(
-  "/:blogId/addlist",
-  passport.authenticate("jwt", {
-    session: false,
-  }),
-  isAuth,
+  "/:userId/:blogId/addlist",
   async (req, res, next) => {
     try {
       const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
-      const user_id = req.user._id;
+      const user_id = new mongoose.mongo.ObjectId(req.params.userId);
       const user = await UserService.addBlogToReadingList(blogId,user_id);
       return res.json({
         ...user,
@@ -596,7 +626,7 @@ router.post(
 );
 
 router.get(
-"/getalllists/:pgeno", 
+"/getreadinglist", 
 passport.authenticate("jwt", {
   session: false,
 }),
@@ -606,11 +636,27 @@ async (req, res, next) => {
   try {
     const user_id = req.user._id;
     const readingLists = await UserService.getReadingList(user_id);
-    res.json({readingLists: readingLists, success: true});
+    console.log(readingLists)
+    return res.json({readingLists: readingLists, success: true});
   } catch (error) {
     console.log(error);
-    res.json({message: `Error: ${error}`, success: false});
+    return res.json({message: `Error: ${error}`, success: false});
   }
 });
+
+
+router.get(
+  "/:userId/getreadinglist", 
+  async (req, res, next) => {
+    
+    try {
+      const user_id = new mongoose.mongo.ObjectId(req.params.userId);
+      const readingLists = await UserService.getReadingList(user_id);
+      res.json({readingLists: readingLists, success: true});
+    } catch (error) {
+      console.log(error);
+      res.json({message: `Error: ${error}`, success: false});
+    }
+  });
 
 module.exports = router;
