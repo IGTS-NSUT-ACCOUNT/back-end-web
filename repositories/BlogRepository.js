@@ -172,6 +172,8 @@ const removeLike = async (blog_id, user_id) => {
   return updatedBlog;
 };
 
+
+
 const deleteBlog = async (blog_id) => {
   await Blog.findByIdAndDelete(blog_id);
 };

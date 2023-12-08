@@ -163,9 +163,16 @@ const registerUserForEvent = async (user_id, event_id) => {
   return updatedUser;
 }
 
+const getReadingList = async (user_id) => {
+  const lists = await UserRepository.getList(user_id);
+ 
+  return lists;
+};
+
 module.exports = {
   removeBlogFromReadingLIst,
   addBlogToReadingList,
+  getReadingList,
   editUserProfile,
   getUserByEmail,
   getUser,

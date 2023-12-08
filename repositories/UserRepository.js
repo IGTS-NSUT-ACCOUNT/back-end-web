@@ -77,17 +77,25 @@ const getReadingList = async (user_id) => {
 //   addBlogIdToReadingList() -
 const addBlogIdToReadingList = async (user_id, blog_id) => {
   const user = await getUserById(user_id);
-  user.readingList.push(blog_id);
-  const updatedUser = await user.save();
-  return updatedUser;
+
+  if (!user.readingList.get(blog_id)) {
+    user.readingList.push(blog_id);
+  }
+
+  const updateduser = await user.save();
+  return updateduser;
 };
 
 //   removeBlogFromReadingList();
 const removeBlogFromReadingList = async (user_id, blog_id) => {
   const user = await getUserById(user_id);
-  user.readingList = user.readingList.filter((el) => !blog_id.equals(el));
-  const updatedUser = await user.save();
-  return updatedUser;
+
+  if (!user.readingList.get(blog_id)) {
+    user.readingList = user.readingList.filter((el) => !blog_id.equals(el));
+  }
+
+  const updateduser = await user.save();
+  return updateduser;
 };
 
 const registerUser = async ({
@@ -126,7 +134,17 @@ const unregisterUserForEvent = async (user_id, event_id) => {
   return updatedUser;
 }
 
+const getList = async (user_id) => {
+  const user = await getUserById(user_id);
+  const readingList = user.readingList;
+  return readingList;
+};
+
+
+
+
 module.exports = {
+  getList,
   getUserById,
   getUserByEmail,
   getReadingList,
@@ -141,5 +159,5 @@ module.exports = {
   deleteUser,
   registerUserForEvent,
   unregisterUserForEvent,
-  getAllUsers,
+  getAllUsers
 };

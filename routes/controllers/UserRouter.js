@@ -545,4 +545,72 @@ router.post("/changepassword/:id/:token", async (req, res) => {
   }
 });
 
+router.post(
+  "/:blogId/removelist",
+  passport.authenticate("jwt", {
+    session: false,
+  }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const user_id = req.user._id;
+      const user = await UserService.removeBlogFromReadingLIst(blogId,user_id);
+      return res.json({
+        ...user,
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      res.json({
+        message: `Error ${error}`,
+        success: false,
+      });
+    }
+  }
+);
+
+router.post(
+  "/:blogId/addlist",
+  passport.authenticate("jwt", {
+    session: false,
+  }),
+  isAuth,
+  async (req, res, next) => {
+    try {
+      const blogId = new mongoose.mongo.ObjectId(req.params.blogId);
+      const user_id = req.user._id;
+      const user = await UserService.addBlogToReadingList(blogId,user_id);
+      return res.json({
+        ...user,
+        success: true,
+      });
+    } catch (error) {
+      console.log(error);
+      res.json({
+        message: `Error ${error}`,
+        success: false,
+      });
+    }
+  }
+);
+
+router.get(
+"/getalllists/:pgeno", 
+passport.authenticate("jwt", {
+  session: false,
+}),
+isAuth,
+async (req, res, next) => {
+  
+  try {
+    const user_id = req.user._id;
+    const readingLists = await UserService.getReadingList(user_id);
+    res.json({readingLists: readingLists, success: true});
+  } catch (error) {
+    console.log(error);
+    res.json({message: `Error: ${error}`, success: false});
+  }
+});
+
 module.exports = router;
