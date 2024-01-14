@@ -102,8 +102,9 @@ const isEditorOfTheBlog = async (req, res, next) => {
 const isModeratorOfTheEvent = async (req, res, next) => {
   const event_id = new mongoose.mongo.ObjectId(req.params.event_id);
   const event = await getEventById(event_id);
-
-  if (req.isAuthenticated() && (req.user.role === 'ADMIN' || event.event_moderators.some(moderator => moderator === req.user._id)))
+  // console.log(req.user);
+  // console.log( event_id)
+  if (req.isAuthenticated() && (req.user.role === 'ADMIN' || event.event_moderators.some(moderator => moderator.toString() === req.user._id.toString())))
     next();
   else {
     res.status(401).json({
