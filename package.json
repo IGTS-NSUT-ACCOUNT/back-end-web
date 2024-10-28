@@ -47,5 +47,8 @@
   "directories": {
     "lib": "lib"
   },
-  "description": ""
+  "description": "",
+  "engines": {
+    "node": ">=16.0.0"
+  }
 }
